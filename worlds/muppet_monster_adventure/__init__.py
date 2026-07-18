@@ -2,7 +2,8 @@ from AutoWorld import World
 
 from BaseClasses import Item, Location
 
-from .Constants import mma_game_name
+mma_base_id: int = 25_899_560
+mma_game_name: str = "Muppet Monster Adventure"
 
 
 class MMAItem(Item):
