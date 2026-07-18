@@ -34,3 +34,9 @@ peacock_purgatory_amulet_locations: dict[str, MMALocationData] = {
     "Noseferatu Amulet - Up super-jump platform": MMALocationData(),
     "Noseferatu Amulet - Up stairs after triggering switch": MMALocationData([Ability.GLOVE]),
 }
+
+peacock_purgatory_locations: dict[str, MMALocationData] = {**peacock_purgatory_amulet_locations}
+
+# TODO: other regions
+
+all_locations_table: dict[str, MMALocationData] = {**peacock_purgatory_locations}
