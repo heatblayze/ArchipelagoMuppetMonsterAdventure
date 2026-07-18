@@ -16,3 +16,5 @@ class MMALocation(Location):
 
 class MuppetMonsterAdventureWorld(World):
     game = "Muppet Monster Adventure"
+
+    # TODO: see blasphemous' locations and init for how i plan on generating location/item ids
