@@ -1,0 +1,2 @@
+- Powers are called "Morphs" per manual
+- Morph coin pickups are called "Amulets"
