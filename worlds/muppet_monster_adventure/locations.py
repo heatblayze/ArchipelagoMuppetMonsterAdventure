@@ -7,7 +7,7 @@ class Ability(StrEnum):
     GLIDE = "glide"
     PUSH = "push"
     SMASH = "smash"
-    # TODO: implement these
+    # TODO: implement these (if possible)
     GLOVE = "glove"
     SPIN = "spin"
 
