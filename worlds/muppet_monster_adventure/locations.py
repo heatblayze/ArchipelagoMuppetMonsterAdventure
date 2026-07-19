@@ -39,4 +39,16 @@ peacock_purgatory_locations: dict[str, MMALocationData] = {**peacock_purgatory_a
 
 # TODO: other regions
 
-all_locations_table: dict[str, MMALocationData] = {**peacock_purgatory_locations}
+all_locations_table: dict[str, dict[str, MMALocationData]] = {
+    "Peacock Purgatory": peacock_purgatory_locations,
+}
+
+
+def location_name_to_id(base_id: int) -> dict[str, int]:
+    """Converts all known locations from their `[Region: [Name: Data]]` format into `[Name: ID]`,
+    where `ID` is a deterministic value greater than `base_id`."""
+    map: dict[str, int] = {}
+    for group_idx, group in enumerate(all_locations_table):
+        for item_idx, loc_name in enumerate(all_locations_table[group]):
+            map[loc_name] = base_id + group_idx + item_idx
+    return map
