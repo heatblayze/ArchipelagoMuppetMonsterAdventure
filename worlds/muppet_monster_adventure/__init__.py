@@ -20,6 +20,8 @@ class MMALocation(Location):
 class MuppetMonsterAdventureWorld(World):
     game = "Muppet Monster Adventure"
 
+    topology_present = False  # Levels can be played in any order.
+
     # TODO: see blasphemous' locations and init for how i plan on generating location/item ids
     item_name_to_id = item_name_to_id(base_id)
     location_name_to_id = location_name_to_id(base_id)
