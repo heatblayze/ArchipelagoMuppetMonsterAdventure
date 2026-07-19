@@ -47,19 +47,16 @@ all_locations_table: dict[str, dict[str, MMALocationData]] = {
 def location_name_to_id(base_id: int) -> dict[str, int]:
     """Converts all locations from their `[Region: [Name: Data]]` format into `[Name: ID]`,
     where `ID` is a deterministic value greater than `base_id`."""
-    map: dict[str, int] = {}
-    for group_idx, region_name in enumerate(all_locations_table):
-        for item_idx, loc_name in enumerate(all_locations_table[region_name]):
-            map[loc_name] = base_id + group_idx + item_idx
-    return map
+    result: dict[str, int] = {}
+    for group_idx, region_data in enumerate(all_locations_table.values()):
+        for item_idx, loc_name in enumerate(region_data):
+            result.update({loc_name: base_id + group_idx + item_idx})
+    return result
 
 
 def location_name_groups() -> dict[str, set[str]]:
     """Converts all locations from their `[Region: [Name: Data]]` format into `[Region: [Name]]`."""
-    map: dict[str, set[str]] = {}
-    for _, region_name in enumerate(all_locations_table):
-        group: list[str] = []
-        for _, loc_name in enumerate(all_locations_table[region_name]):
-            group.append(loc_name)
-        map[region_name] = set(group)
-    return map
+    result: dict[str, set[str]] = {}
+    for region_name, region_data in all_locations_table.items():
+        result[region_name] = set(region_data.keys())
+    return result

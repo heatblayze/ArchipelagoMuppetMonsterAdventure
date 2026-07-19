@@ -33,18 +33,15 @@ def item_name_to_id(base_id: int) -> dict[str, int]:
     """Converts all items from their `[Type: [Name: Data]]` format into `[Name: ID]`,
     where `ID` is a deterministic value greater than `base_id`."""
     map: dict[str, int] = {}
-    for group_idx, group_name in enumerate(all_items_table):
-        for item_idx, item_name in enumerate(all_items_table[group_name]):
-            map[item_name] = base_id + group_idx + item_idx
+    for group_idx, group_items in enumerate(all_items_table.values()):
+        for item_idx, item_name in enumerate(group_items):
+            map.update({item_name: base_id + group_idx + item_idx})
     return map
 
 
 def item_name_groups() -> dict[str, set[str]]:
     """Converts all items from their `[Type: [Name: Data]]` format into `[Type: [Name]]`."""
-    map: dict[str, set[str]] = {}
-    for _, group_name in enumerate(all_items_table):
-        group: list[str] = []
-        for _, item_name in enumerate(all_items_table[group_name]):
-            group.append(item_name)
-        map[group_name] = set(group)
-    return map
+    result: dict[str, set[str]] = {}
+    for group_name, group_items in all_items_table.items():
+        result[group_name] = set(group_items.keys())
+    return result

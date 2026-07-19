@@ -1,12 +1,10 @@
-from AutoWorld import World
-
 from BaseClasses import Item, Location
+from worlds.AutoWorld import World
 
+from .client import *  # noqa: F403
+from .constants import base_id, game_name
 from .items import item_name_groups, item_name_to_id
 from .locations import location_name_groups, location_name_to_id
-
-base_id: int = 25_899_560
-game_name: str = "Muppet Monster Adventure"
 
 
 class MMAItem(Item):
@@ -18,7 +16,7 @@ class MMALocation(Location):
 
 
 class MuppetMonsterAdventureWorld(World):
-    game = "Muppet Monster Adventure"
+    game = game_name
 
     topology_present = False  # Levels can be played in any order.
 
