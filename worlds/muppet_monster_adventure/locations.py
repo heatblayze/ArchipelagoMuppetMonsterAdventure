@@ -48,7 +48,7 @@ def location_name_to_id(base_id: int) -> dict[str, int]:
     """Converts all known locations from their `[Region: [Name: Data]]` format into `[Name: ID]`,
     where `ID` is a deterministic value greater than `base_id`."""
     map: dict[str, int] = {}
-    for group_idx, group in enumerate(all_locations_table):
-        for item_idx, loc_name in enumerate(all_locations_table[group]):
+    for group_idx, group_name in enumerate(all_locations_table):
+        for item_idx, loc_name in enumerate(all_locations_table[group_name]):
             map[loc_name] = base_id + group_idx + item_idx
     return map
