@@ -4,10 +4,9 @@ import worlds._bizhawk as bizhawk
 from worlds._bizhawk.client import BizHawkClient
 
 if TYPE_CHECKING:
-    from CommonClient import logger
     from worlds._bizhawk.context import BizHawkClientContext
 
-from .constants import base_id, game_name
+from .constants import game_name
 
 
 class MMAClient(BizHawkClient):
@@ -21,7 +20,7 @@ class MMAClient(BizHawkClient):
     async def validate_rom(self, ctx: "BizHawkClientContext") -> bool:
         try:
             # Check ROM name/patch version
-            rom_name = ((await bizhawk.read(ctx.bizhawk_ctx, [(0x009274, 11, "ROM")]))[0]).decode("ascii")
+            rom_name = ((await bizhawk.read(ctx.bizhawk_ctx, [(0x009274, 11, "MainRAM")]))[0]).decode("ascii")
             if rom_name != "SLUS_012.38":
                 return False
         except bizhawk.RequestFailedError:
@@ -32,8 +31,21 @@ class MMAClient(BizHawkClient):
         ctx.want_slot_data = True
         ctx.watcher_timeout = 0.125
         self.loading_bios_msg = False
+        self.last_pickups: list[bytes] = [bytes(0)]
 
         return True
 
     async def game_watcher(self, ctx: "BizHawkClientContext") -> None:
+        from CommonClient import logger
+
+        # Logging changes to amulet pickups
+        pickups_flag = await bizhawk.read(ctx.bizhawk_ctx, [(0x0CCB78, 3, "MainRAM")])
+
+        if self.last_pickups != pickups_flag:
+            self.last_pickups = pickups_flag
+            logger.info(f"Pickup flags is: {int(pickups_flag[0].hex(), base=16):024b}")
+
+        # Always have all powers
+        await bizhawk.write(ctx.bizhawk_ctx, [(0x0B76F8, (255).to_bytes(2, "little"), "MainRAM")])
+
         return
