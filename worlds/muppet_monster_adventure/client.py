@@ -44,8 +44,18 @@ class MMAClient(BizHawkClient):
         if self.last_pickups != pickups_flag:
             self.last_pickups = pickups_flag
             logger.info(f"Pickup flags is: {int(pickups_flag[0].hex(), base=16):024b}")
+            logger.info(f"{self.extract_amulet_flags(int(pickups_flag[0].hex(), base=16))}")
 
         # Always have all powers
         await bizhawk.write(ctx.bizhawk_ctx, [(0x0B76F8, (255).to_bytes(2, "little"), "MainRAM")])
 
         return
+
+    def extract_amulet_flags(self, data: int) -> dict[str, bool]:
+        result: dict[str, bool] = {}
+        # climb, glide, push, swim, smash (last nibble is unused (?))
+        result["Werebear amulet: First"] = ((data >> 20) & 1) == 1
+        result["Werebear amulet: Second"] = ((data >> 23) & 1) == 1
+        result["Werebear amulet: Third"] = ((data >> 22) & 1) == 1
+        result["Werebear amulet: Fourth"] = ((data >> 21) & 1) == 1
+        return result
