@@ -45,7 +45,7 @@ class MMARegion:
     ) -> None:
         self.name: str = name.value
         self.identifier: str = identifier
-        self.state_address: int | None = state_address
+        self.state_address: int | None = state_address  # TODO: once we implement the LUT, this won't be necessary
         self.energy_count: int = energy_count
         self.locations: list[MMALocationData] = locations
         pass
@@ -63,7 +63,7 @@ all_locations_table: list[MMARegion] = [
     MMARegion(
         LevelName.PEACOCK_PURGATORY,
         "CASTLE1",
-        0x0CCB86,  # TODO: make this use the LUT reference key
+        0x0CCB86,
         300,
         [
             # Amulets
