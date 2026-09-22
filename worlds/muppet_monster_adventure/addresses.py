@@ -1,18 +1,4 @@
-from enum import StrEnum
 from typing import NamedTuple
-
-
-# TODO: fill out
-class AddressType(StrEnum):
-    LOADING_STATE = "Loading State"  # 16 on ready, 64 when loading
-    BOSSES_BEATEN = (
-        "Bosses Beaten"  # An awesome field that lists the highest boss number beaten (please find an alternative)
-    )
-    LEVEL_STATE = "Level State"  # Energy, tokens, bonus (per level)
-    AMULETS = "Amulets"  # All amulets are one 3-byte long field
-    POWER_GLOVE = "Power Glove"
-    SPIN_ATTACK = "Spin Attack"
-    MORPHS = "Morphs"  # This is also a single 1-byte field
 
 
 # A look-up table for all the memory addresses.

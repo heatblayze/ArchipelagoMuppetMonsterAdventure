@@ -217,7 +217,7 @@ class MMAGameState:
             return True
         return False
 
-    def in_playable_level(self) -> bool:
+    def is_save_loaded(self) -> bool:
         return (
             self.active_level_name != ""
             and self.active_level_name != "FRONT1"
@@ -225,12 +225,14 @@ class MMAGameState:
             and not self.active_level_name.startswith("DEMO")
         )
 
-    async def update(self, ctx: "BizHawkClientContext") -> None:
+    # For writing persistent flags that need to be set every frame.
+    # If this function returns False, we should not update this frame.
+    async def try_write_flags(self, ctx: "BizHawkClientContext") -> bool:
         # This flag seems to be 16 when a level is ready, and 64 when a level is loading.
         load_state = await bizhawk.read(ctx.bizhawk_ctx, [(0x00EAB9, 1, "MainRAM")])
         load_state_int = int.from_bytes(load_state[0], byteorder="little")
         if load_state_int != 16:
-            return
+            return False
 
         if self.active_level_name == "HUB":
             # Write level unlocks, always have all zones unlocked
@@ -239,6 +241,7 @@ class MMAGameState:
         else:
             # Write powers
             await bizhawk.write(ctx.bizhawk_ctx, [(0x0B76F8, self.player.morphs.get_bytes(), "MainRAM")])
+        return True
 
     async def receive_items(self, ctx: "BizHawkClientContext") -> None:
         new_items = ctx.items_received[self.last_received_index :]
@@ -410,10 +413,11 @@ class MMAClient(BizHawkClient):
         self.state: MMAGameState
         self.last_received_index: int = 0
         self.goaled: bool = False
-        self.was_in_playable_level: bool = False
+        self.was_save_loaded: bool = False
 
     def init_state(self, level_name: str | None = None) -> None:
         # TODO: goal options?
+        # TODO: pass address LUT
         self.state = MMAGameState(1)
         if level_name is not None:
             self.state.active_level_name = level_name
@@ -465,20 +469,19 @@ class MMAClient(BizHawkClient):
         if await self.state.update_level_name(ctx):
             logger.info(f"Level changed to '{self.state.active_level_name}'")
 
-        if (
-            self.state.active_level_name == ""
-            or self.state.active_level_name == "FRONT1"
-            or self.state.active_level_name == "GLOBAL"
-            or self.state.active_level_name.startswith("DEMO")
-        ):
+        if not self.state.is_save_loaded():
             # Not in-game.
-            if self.was_in_playable_level:
+            if self.was_save_loaded:
                 # Player returned to menu. Reset state.
                 # Copy the old level name to prevent re-firing any listeners on the level change.
                 self.init_state(self.state.active_level_name)
-            self.was_in_playable_level = False
+            self.was_save_loaded = False
             return
-        self.was_in_playable_level = True
+        self.was_save_loaded = True
+
+        if not await self.state.try_write_flags(ctx):
+            # Game is loaded correctly, but is not in a state to write anything.
+            return
 
         # Locations may have triggered own items, so check those first.
         await self.state.check_locations(ctx)
