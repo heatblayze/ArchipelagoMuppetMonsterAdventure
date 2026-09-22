@@ -365,7 +365,7 @@ all_locations_table: list[MMARegion] = [
         "CASTLEB",
         None,
         0,
-        [MMALocationData("Boss defeated", LocationType.BOSS)],
+        [MMALocationData("Boss defeated", LocationType.BOSS, [AbilityFlag.GLOVE])],
     ),
 ]
 
