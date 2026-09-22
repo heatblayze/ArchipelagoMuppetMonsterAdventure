@@ -4,7 +4,7 @@ from typing import ClassVar, final
 
 from BaseClasses import ItemClassification
 
-from .shared import AbilityFlag, ItemFlag, LevelName, TrapFlag, base_id
+from .shared import AbilityFlag, FillerType, LevelName, TrapType, base_id
 
 
 class MMAItemData(ABC):
@@ -38,30 +38,30 @@ class MMALevelItemData(MMAItemData):
 class MMAFillerItemData(MMAItemData):
     group = "Filler"
 
-    def __init__(self, name: str, item_type: ItemFlag) -> None:
-        super().__init__(name, ItemClassification.filler)
-        self.item_type: ItemFlag = item_type
+    def __init__(self, item_type: FillerType) -> None:
+        super().__init__(item_type.value, ItemClassification.filler)
+        self.item_type: FillerType = item_type
 
 
 @final
 class MMATrapItemData(MMAItemData):
     group = "Trap"
 
-    def __init__(self, name: str, trap_type: TrapFlag) -> None:
-        super().__init__(name, ItemClassification.trap)
-        self.trap_type: TrapFlag = trap_type
+    def __init__(self, trap_type: TrapType) -> None:
+        super().__init__(trap_type.value, ItemClassification.trap)
+        self.trap_type: TrapType = trap_type
 
 
 filler_items_table: list[MMAFillerItemData] = [
-    MMAFillerItemData("Heart", ItemFlag.GAIN_HEALTH),
-    MMAFillerItemData("Fly Heart", ItemFlag.GAIN_HEART),
-    MMAFillerItemData("Extra Life", ItemFlag.GAIN_LIFE),
+    MMAFillerItemData(FillerType.GAIN_HEALTH),
+    MMAFillerItemData(FillerType.GAIN_HEART),
+    MMAFillerItemData(FillerType.GAIN_LIFE),
 ]
 
 trap_items_table: list[MMATrapItemData] = [
-    MMATrapItemData("Ouch!", TrapFlag.LOSE_HEALTH),
-    MMATrapItemData("Fly Away", TrapFlag.LOSE_HEART),
-    MMATrapItemData("No Life Gaming", TrapFlag.LOSE_LIFE),
+    MMATrapItemData(TrapType.LOSE_HEALTH),
+    MMATrapItemData(TrapType.LOSE_HEART),
+    MMATrapItemData(TrapType.LOSE_LIFE),
 ]
 
 all_items_table: Sequence[MMAItemData] = [

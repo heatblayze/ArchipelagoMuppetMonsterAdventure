@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, ClassVar, NamedTuple
 
 if TYPE_CHECKING:
     from worlds._bizhawk.context import BizHawkClientContext
@@ -7,7 +7,7 @@ import worlds._bizhawk as bizhawk
 from NetUtils import ClientStatus
 from worlds._bizhawk.client import BizHawkClient
 
-from .items import MMAAbilityItemData, MMALevelItemData, MMAFillerItemData, MMATrapItemData, item_id_to_item
+from .items import MMAAbilityItemData, MMAFillerItemData, MMALevelItemData, MMATrapItemData, item_id_to_item
 from .locations import (
     LocationType,
     location_name_to_id,
@@ -15,7 +15,7 @@ from .locations import (
     location_type_lookup_by_region,
     region_lookup,
 )
-from .shared import AbilityFlag, ItemFlag, TrapFlag, game_name
+from .shared import AbilityFlag, FillerType, TrapType, game_name
 
 
 class MMAFlagField:
@@ -114,33 +114,17 @@ class MMAAmuletState:
         return self.flags.process_changes(data)
 
 
-class MMAGameState:
-    def __init__(self) -> None:
-        self.bosses_beaten: list[bool] = [False] * 5
-        self.morphs: MMAMorphState = MMAMorphState()
-        self.level_states: dict[str, MMALevelState] = {
-            x.identifier: MMALevelState(x.name, x.state_address, x.energy_count)
-            for x in region_lookup.values()
-            if x.state_address is not None
-        }
-        self.level_unlocks: list[bool] = [False for _ in region_lookup.values()]
-        self.amulets: dict[LocationType, MMAAmuletState] = {
-            LocationType.NOSEFERATU_AMULET: MMAAmuletState(0),
-            LocationType.WEREBEAR_AMULET: MMAAmuletState(4),
-            LocationType.KER_MONSTER_AMULET: MMAAmuletState(8),
-            LocationType.MUCK_MONSTER_AMULET: MMAAmuletState(12),
-            LocationType.GHOUL_FRIEND_AMULET: MMAAmuletState(16),
-        }
-
 class MMAPlayerState:
     def __init__(self) -> None:
+        self.morphs: MMAMorphState = MMAMorphState()
+
         # This is the "Current Lives" address, change this if we want things earlier than it
-        self.current_lives_address = 0x0B8908
-        self.current_health_address = 0x0B8909
-        self.max_health_address = 0x0B890A
+        self.current_lives_address: int = 0x0B8908
+        self.current_health_address: int = 0x0B8909
+        self.max_health_address: int = 0x0B890A
 
         # Limit the maximum health and lives to this number
-        self.max_limit = 100
+        self.max_limit: int = 100
 
         # TODO: Identify all the spots where this is all defined
         # Not all of this is player related, feel free to move to where appropriate
@@ -151,11 +135,8 @@ class MMAPlayerState:
         # Current Lives  = 0x0B8908
         # Current Health = 0x0B8909
         # Max Health     = 0x0B890A
-    async def change_current_health(
-        self,
-        increase: bool,
-        ctx: "BizHawkClientContext"
-    ):
+
+    async def change_current_health(self, increase: bool, ctx: "BizHawkClientContext"):
         # Grab the current health and the max health
         data = (await bizhawk.read(ctx.bizhawk_ctx, [(self.current_health_address, 2, "MainRAM")]))[0]
         current_health = data[0]
@@ -167,13 +148,7 @@ class MMAPlayerState:
             new_health = current_health - 1 if current_health > 0 else 0
         await bizhawk.write(ctx.bizhawk_ctx, [(self.current_health_address, [new_health], "MainRAM")])
 
-
-
-    async def change_max_health(
-        self,
-        increase: bool,
-        ctx: "BizHawkClientContext"
-    ):
+    async def change_max_health(self, increase: bool, ctx: "BizHawkClientContext"):
         # Grab the max health
         data = (await bizhawk.read(ctx.bizhawk_ctx, [(self.current_health_address, 2, "MainRAM")]))[0]
         current_health = data[0]
@@ -190,12 +165,7 @@ class MMAPlayerState:
         if current_health > new_max_health:
             await bizhawk.write(ctx.bizhawk_ctx, [(self.current_health_address, [new_max_health], "MainRAM")])
 
-
-    async def change_current_lives(
-        self,
-        increase: bool,
-        ctx: "BizHawkClientContext"
-    ):
+    async def change_current_lives(self, increase: bool, ctx: "BizHawkClientContext"):
         # Grab the current health and the max health
         data = (await bizhawk.read(ctx.bizhawk_ctx, [(self.current_lives_address, 1, "MainRAM")]))[0]
         current_lives = data[0]
@@ -207,94 +177,30 @@ class MMAPlayerState:
         await bizhawk.write(ctx.bizhawk_ctx, [(self.current_lives_address, [new_lives], "MainRAM")])
 
 
-class MMAClient(BizHawkClient):
-    game = game_name
-    system = "PSX"
-    items_handling = 0b111
-    patch_suffix = None
+class MMAGameState:
+    def __init__(self, boss_goal_count: int) -> None:
+        self.boss_goal_count: int = boss_goal_count
 
-    def __init__(self):
-        super().__init__()
+        self.player: MMAPlayerState = MMAPlayerState()
+        self.bosses_beaten: list[bool] = [False] * 5
+        self.level_states: dict[str, MMALevelState] = {
+            x.identifier: MMALevelState(x.name, x.state_address, x.energy_count)
+            for x in region_lookup.values()
+            if x.state_address is not None
+        }
+        self.level_unlocks: list[bool] = [False for _ in region_lookup.values()]
+        self.amulets: dict[LocationType, MMAAmuletState] = {
+            LocationType.NOSEFERATU_AMULET: MMAAmuletState(0),
+            LocationType.WEREBEAR_AMULET: MMAAmuletState(4),
+            LocationType.KER_MONSTER_AMULET: MMAAmuletState(8),
+            LocationType.MUCK_MONSTER_AMULET: MMAAmuletState(12),
+            LocationType.GHOUL_FRIEND_AMULET: MMAAmuletState(16),
+        }
 
-        self.last_amulets_flags: list[bytes] = [bytes(0)]
         self.active_level_name: str = ""
-        self.game_state: MMAGameState = MMAGameState()
-        self.player_state: MMAPlayerState = MMAPlayerState()
-        self.last_received_index: int = 0
-        self.boss_goal_count: int = 1
+        self.last_amulets_flags: list[bytes] = [bytes(0)]
         self.goaled: bool = False
-
-    async def validate_rom(self, ctx: "BizHawkClientContext") -> bool:
-        try:
-            # NTSC
-            rom_name = ((await bizhawk.read(ctx.bizhawk_ctx, [(0x009274, 11, "MainRAM")]))[0]).decode("ascii")
-            if rom_name != "SLUS_012.38":
-                # PAL
-                rom_name = ((await bizhawk.read(ctx.bizhawk_ctx, [(0x00928C, 11, "MainRAM")]))[0]).decode("ascii")
-                if rom_name != "SCES_024.03":
-                    return False
-        except bizhawk.RequestFailedError:
-            return False
-
-        ctx.game = self.game
-        ctx.items_handling = self.items_handling
-        ctx.want_slot_data = True
-        ctx.watcher_timeout = 0.125
-        return True
-
-    def on_package(self, ctx: "BizHawkClientContext", cmd: str, args: dict[object, object]) -> None:
-        super().on_package(ctx, cmd, args)  # pyright: ignore[reportUnknownMemberType]
-
-        match cmd:
-            case "Connected":
-                # TODO: Read relevant slot data & reset state
-                pass
-            case _:
-                pass
-            # TODO: race countdown
-        pass
-
-    async def set_auth(self, ctx: "BizHawkClientContext") -> None:
-        await ctx.get_username()
-
-    async def game_watcher(self, ctx: "BizHawkClientContext") -> None:
-        from CommonClient import logger
-
-        if ctx.server is None or ctx.server.socket.closed or ctx.slot_data is None or ctx.auth is None:
-            return
-
-        # TODO: first run should validate current state
-
-        if await self.update_level_name(ctx):
-            logger.info(f"Level changed to '{self.active_level_name}'")
-
-        if (
-            self.active_level_name == ""
-            or self.active_level_name == "FRONT1"
-            or self.active_level_name == "GLOBAL"
-            or self.active_level_name.startswith("DEMO")
-        ):
-            # Not in-game
-            return
-
-        await self.check_locations(ctx)
-        await self.receive_items(ctx)
-
-        # This flag seems to be 16 when a level is ready, and 64 when a level is loading.
-        load_state = await bizhawk.read(ctx.bizhawk_ctx, [(0x00EAB9, 1, "MainRAM")])
-        load_state_int = int.from_bytes(load_state[0], byteorder="little")
-        if load_state_int != 16:
-            return
-
-        if self.active_level_name == "HUB":
-            # Write level unlocks, always have all regions unlocked
-            write_list: list[int] = [0xFF if unlocked else 0x00 for unlocked in self.game_state.level_unlocks]
-            await bizhawk.write(ctx.bizhawk_ctx, [(0x0AA0C4, write_list, "MainRAM"), (0x0E22F0, [5], "MainRAM")])
-        else:
-            # Write powers
-            await bizhawk.write(ctx.bizhawk_ctx, [(0x0B76F8, self.game_state.morphs.get_bytes(), "MainRAM")])
-
-        return
+        self.last_received_index: int = 0
 
     async def update_level_name(self, ctx: "BizHawkClientContext") -> bool:
         # TODO: not exactly sure how many bytes the name uses.
@@ -311,10 +217,90 @@ class MMAClient(BizHawkClient):
             return True
         return False
 
+    def in_playable_level(self) -> bool:
+        return (
+            self.active_level_name != ""
+            and self.active_level_name != "FRONT1"
+            and self.active_level_name != "GLOBAL"
+            and not self.active_level_name.startswith("DEMO")
+        )
+
+    async def update(self, ctx: "BizHawkClientContext") -> None:
+        # This flag seems to be 16 when a level is ready, and 64 when a level is loading.
+        load_state = await bizhawk.read(ctx.bizhawk_ctx, [(0x00EAB9, 1, "MainRAM")])
+        load_state_int = int.from_bytes(load_state[0], byteorder="little")
+        if load_state_int != 16:
+            return
+
+        if self.active_level_name == "HUB":
+            # Write level unlocks, always have all zones unlocked
+            write_list: list[int] = [0xFF if unlocked else 0x00 for unlocked in self.level_unlocks]
+            await bizhawk.write(ctx.bizhawk_ctx, [(0x0AA0C4, write_list, "MainRAM"), (0x0E22F0, [5], "MainRAM")])
+        else:
+            # Write powers
+            await bizhawk.write(ctx.bizhawk_ctx, [(0x0B76F8, self.player.morphs.get_bytes(), "MainRAM")])
+
+    async def receive_items(self, ctx: "BizHawkClientContext") -> None:
+        new_items = ctx.items_received[self.last_received_index :]
+        if len(new_items) == 0:
+            return
+
+        for net_item in new_items:
+            item = item_id_to_item[net_item.item]
+            match item:
+                case MMAAbilityItemData():
+                    match item.ability_type:
+                        case AbilityFlag.GLIDE:
+                            self.player.morphs.glide = True
+                        case AbilityFlag.CLIMB:
+                            self.player.morphs.climb = True
+                        case AbilityFlag.PUSH:
+                            self.player.morphs.push = True
+                        case AbilityFlag.SWIM:
+                            self.player.morphs.swim = True
+                        case AbilityFlag.SMASH:
+                            self.player.morphs.smash = True
+                        case _:
+                            # TODO: glove & spin
+                            pass
+                case MMALevelItemData():
+                    self.level_unlocks[item.index] = True
+                    pass
+                case MMAFillerItemData():
+                    match item.item_type:
+                        case FillerType.GAIN_HEALTH:
+                            await self.player.change_current_health(True, ctx)
+                            pass
+                        case FillerType.GAIN_HEART:
+                            await self.player.change_max_health(True, ctx)
+                            pass
+                        case FillerType.GAIN_LIFE:
+                            await self.player.change_current_lives(True, ctx)
+                            pass
+                        case _:
+                            pass
+                case MMATrapItemData():
+                    match item.trap_type:
+                        case TrapType.LOSE_HEALTH:
+                            await self.player.change_current_health(False, ctx)
+                            pass
+                        case TrapType.LOSE_HEART:
+                            await self.player.change_max_health(False, ctx)
+                            pass
+                        case TrapType.LOSE_LIFE:
+                            await self.player.change_current_lives(False, ctx)
+                            pass
+                        case _:
+                            pass
+                    pass
+                case _:
+                    pass
+
+        self.last_received_index = len(ctx.items_received)
+
     async def check_locations(self, ctx: "BizHawkClientContext") -> None:
         from CommonClient import logger
 
-        # TODO: PAL differences?
         amulets_flag = await bizhawk.read(ctx.bizhawk_ctx, [(0x0CCB78, 3, "MainRAM")])
         if amulets_flag != self.last_amulets_flags:
             self.last_amulets_flags = amulets_flag
@@ -322,7 +308,7 @@ class MMAClient(BizHawkClient):
 
             # Extract amulet pickup changes
             amulet_collections: list[int] = []
-            for amulet_type, state in self.game_state.amulets.items():
+            for amulet_type, state in self.amulets.items():
                 changes = state.process_changes(flags_int)
                 # TODO: emit location collection
                 if len(changes) > 0:
@@ -336,7 +322,7 @@ class MMAClient(BizHawkClient):
                 # TODO: do we want to do anything with this information?
                 _ = await ctx.check_locations(amulet_collections)
 
-        if (level := self.game_state.level_states.get(self.active_level_name)) is not None:
+        if (level := self.level_states.get(self.active_level_name)) is not None:
             level_state_collections: list[int] = []
             region_lookup = location_type_lookup_by_region[level.name]
 
@@ -384,13 +370,13 @@ class MMAClient(BizHawkClient):
                 # This flag stores the highest value boss number. For our purposes we treat this as
                 # the most recent boss number.
                 boss_index = bosses_beaten - 1
-                self.game_state.bosses_beaten[boss_index] = True
+                self.bosses_beaten[boss_index] = True
                 location = location_type_lookup[LocationType.BOSS][boss_index]
                 ap_id = location_name_to_id[location.full_identifier]
                 _ = await ctx.check_locations([ap_id])
 
-                completed_bosses = list(filter(lambda b: b, self.game_state.bosses_beaten))
-                if len(completed_bosses) >= self.boss_goal_count:
+                completed_bosses = list(filter(lambda b: b, self.bosses_beaten))
+                if len(completed_bosses) >= self.boss_goal_count and not self.goaled:
                     logger.info("Goaled")
                     self.goaled = True
                     await ctx.send_msgs(
@@ -402,62 +388,99 @@ class MMAClient(BizHawkClient):
                         ]
                     )
             pass
+        return
 
-    async def receive_items(self, ctx: "BizHawkClientContext") -> None:
-        new_items = ctx.items_received[self.last_received_index :]
-        if len(new_items) == 0:
+
+class MMAClient(BizHawkClient):
+    game = game_name
+    system = "PSX"
+    items_handling = 0b111
+    patch_suffix = None
+
+    # TODO: we likely need to create an entire look-up table for each version.
+    # Finding all the locations will be trivial, just requires work.
+    versions: ClassVar[dict[str, int]] = {
+        "SLUS_012.38": 0x009274,  # NTSC
+        # "SCES_024.03": 0x00928C,  # PAL AU/NZ
+    }
+
+    def __init__(self):
+        super().__init__()
+
+        self.state: MMAGameState
+        self.last_received_index: int = 0
+        self.goaled: bool = False
+        self.was_in_playable_level: bool = False
+
+    def init_state(self, level_name: str | None = None) -> None:
+        # TODO: goal options?
+        self.state = MMAGameState(1)
+        if level_name is not None:
+            self.state.active_level_name = level_name
+
+    async def validate_rom(self, ctx: "BizHawkClientContext") -> bool:
+        try:
+            # TODO: this should set the look-up table.
+            found: bool = False
+            for name, address in self.versions.items():
+                rom_name = ((await bizhawk.read(ctx.bizhawk_ctx, [(address, 11, "MainRAM")]))[0]).decode("ascii")
+                if rom_name == name:
+                    found = True
+                    break
+            if not found:
+                return False
+        except bizhawk.RequestFailedError:
+            return False
+
+        ctx.game = self.game
+        ctx.items_handling = self.items_handling
+        ctx.want_slot_data = True
+        ctx.watcher_timeout = 0.125
+        return True
+
+    def on_package(self, ctx: "BizHawkClientContext", cmd: str, args: dict[object, object]) -> None:
+        super().on_package(ctx, cmd, args)  # pyright: ignore[reportUnknownMemberType]
+
+        match cmd:
+            case "Connected":
+                # TODO: Read relevant slot data & reset state
+                pass
+            case _:
+                pass
+            # TODO: race countdown
+        pass
+
+    async def set_auth(self, ctx: "BizHawkClientContext") -> None:
+        await ctx.get_username()
+
+    async def game_watcher(self, ctx: "BizHawkClientContext") -> None:
+        from CommonClient import logger
+
+        # TODO: we probably want to keep state as `None` until the player is connected, and reset when disconnected.
+        if ctx.server is None or ctx.server.socket.closed or ctx.slot_data is None or ctx.auth is None:
+            # Just reset state whenever we disconnect.
+            self.init_state()
             return
 
-        for net_item in new_items:
-            item = item_id_to_item[net_item.item]
-            match item:
-                case MMAAbilityItemData():
-                    match item.ability_type:
-                        case AbilityFlag.GLIDE:
-                            self.game_state.morphs.glide = True
-                        case AbilityFlag.CLIMB:
-                            self.game_state.morphs.climb = True
-                        case AbilityFlag.PUSH:
-                            self.game_state.morphs.push = True
-                        case AbilityFlag.SWIM:
-                            self.game_state.morphs.swim = True
-                        case AbilityFlag.SMASH:
-                            self.game_state.morphs.smash = True
-                        case _:
-                            # TODO: glove & spin
-                            pass
-                case MMALevelItemData():
-                    self.game_state.level_unlocks[item.index] = True
-                    pass
-                case MMAFillerItemData():
-                    match item.item_type:
-                        case ItemFlag.GAIN_HEALTH:
-                            await self.player_state.change_current_health(True, ctx)
-                            pass
-                        case ItemFlag.GAIN_HEART:
-                            await self.player_state.change_max_health(True, ctx)
-                            pass
-                        case ItemFlag.GAIN_LIFE:
-                            await self.player_state.change_current_lives(True, ctx)
-                            pass
-                        case _:
-                            pass
-                case MMATrapItemData():
-                    match item.trap_type:
-                        case TrapFlag.LOSE_HEALTH:
-                            await self.player_state.change_current_health(False, ctx)
-                            pass
-                        case TrapFlag.LOSE_HEART:
-                            await self.player_state.change_max_health(False, ctx)
-                            pass
-                        case TrapFlag.LOSE_LIFE:
-                            await self.player_state.change_current_lives(False, ctx)
-                            pass
-                        case _:
-                            pass
-                    pass
-                case _:
-                    pass
+        if await self.state.update_level_name(ctx):
+            logger.info(f"Level changed to '{self.state.active_level_name}'")
 
-        self.last_received_index = len(ctx.items_received)
-        pass
+        if (
+            self.state.active_level_name == ""
+            or self.state.active_level_name == "FRONT1"
+            or self.state.active_level_name == "GLOBAL"
+            or self.state.active_level_name.startswith("DEMO")
+        ):
+            # Not in-game.
+            if self.was_in_playable_level:
+                # Player returned to menu. Reset state.
+                # Copy the old level name to prevent re-firing any listeners on the level change.
+                self.init_state(self.state.active_level_name)
+            self.was_in_playable_level = False
+            return
+        self.was_in_playable_level = True
+
+        # Locations may have triggered own items, so check those first.
+        await self.state.check_locations(ctx)
+        await self.state.receive_items(ctx)
+        return

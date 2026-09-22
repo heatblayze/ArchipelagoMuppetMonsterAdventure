@@ -39,13 +39,13 @@ whitelisted_starting_levels: list[LevelName] = [
 ]
 
 
-class ItemFlag(Flag):
-    GAIN_HEALTH = auto(),
-    GAIN_HEART  = auto(),
-    GAIN_LIFE   = auto(),
+class FillerType(StrEnum):
+    GAIN_HEALTH = "Gain Health"
+    GAIN_HEART = "Fly Heart"
+    GAIN_LIFE = "Extra Life"
 
 
-class TrapFlag(Flag):
-    LOSE_HEALTH = auto(),
-    LOSE_HEART  = auto(),
-    LOSE_LIFE   = auto(),
+class TrapType(StrEnum):
+    LOSE_HEALTH = "Ouch!"
+    LOSE_HEART = "Fly Away"
+    LOSE_LIFE = "No Life Gaming"

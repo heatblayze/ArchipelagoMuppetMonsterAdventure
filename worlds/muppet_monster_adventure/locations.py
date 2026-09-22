@@ -63,7 +63,7 @@ all_locations_table: list[MMARegion] = [
     MMARegion(
         LevelName.PEACOCK_PURGATORY,
         "CASTLE1",
-        0x0CCB86,
+        0x0CCB86,  # TODO: make this use the LUT reference key
         300,
         [
             # Amulets
