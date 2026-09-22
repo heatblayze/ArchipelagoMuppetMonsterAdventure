@@ -10,9 +10,18 @@ class AbilityFlag(Flag):
     PUSH = auto()
     SWIM = auto()
     SMASH = auto()
-    # TODO: implement these (if possible)
     GLOVE = auto()
     SPIN = auto()
+    ALL_MORPHS = GLIDE | CLIMB | PUSH | SWIM | SMASH
+    ALL_WEAPONS = GLOVE | SPIN
+
+
+# Helper function to generate location rules that just require being able to kill enemies.
+def any_weapon_flag(other: AbilityFlag) -> list[AbilityFlag]:
+    return [
+        other | AbilityFlag.GLOVE,
+        other | AbilityFlag.SPIN,
+    ]
 
 
 class LevelName(StrEnum):

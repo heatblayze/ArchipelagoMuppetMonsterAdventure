@@ -51,8 +51,14 @@ class MMARegion:
         pass
 
 
+# TODO: currently we're assuming checks can be done without caring about taking damage
+# The iframes are very lenient, allowing you to get past basically every enemy,
+# and the levels tend to have a good number of recovery hearts.
+# Most enemies also stand in place, and are melee only.
+# Playtesting is required here...
+# If we want to keep it as-is, we should at least make it an option (at least for zone 2+)
+
 # Note: The order of basically all of these matters, since the client depends on this to check world state.
-# TODO: other regions
 all_locations_table: list[MMARegion] = [
     MMARegion(
         LevelName.PEACOCK_PURGATORY,
