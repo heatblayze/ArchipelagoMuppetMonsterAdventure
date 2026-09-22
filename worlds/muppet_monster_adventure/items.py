@@ -71,9 +71,8 @@ all_items_table: Sequence[MMAItemData] = [
     MMAAbilityItemData("Block Pushing", AbilityFlag.PUSH),
     MMAAbilityItemData("Swimming", AbilityFlag.SWIM),
     MMAAbilityItemData("Smashing", AbilityFlag.SMASH),
-    # TODO: figure out how to lock these (if possible)
-    # MMAItemData("Power Glove", IC.progression),
-    # MMAItemData("Spin", IC.progression),
+    MMAAbilityItemData("Power Glove", AbilityFlag.GLOVE),
+    MMAAbilityItemData("Spin", AbilityFlag.SPIN),
     # Levels
     MMALevelItemData(LevelName.PEACOCK_PURGATORY),
     MMALevelItemData(LevelName.HALLWAYS_OF_DOOM),

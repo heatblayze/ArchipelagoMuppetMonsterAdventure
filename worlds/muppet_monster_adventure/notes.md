@@ -14,7 +14,7 @@ Nothing:
 - BONUS
 - 4/4 werebear amulets
 - 3/4 noseferatu amulets
-- 1/4 muck monster amulets
+- 2/4 muck monster amulets
 
 Werebear:
 
