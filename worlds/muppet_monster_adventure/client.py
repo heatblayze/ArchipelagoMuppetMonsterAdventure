@@ -219,8 +219,8 @@ class MMAGameState(MMAAddressTableConsumer):
             await bizhawk.write(
                 ctx.bizhawk_ctx,
                 [
-                    (self.address_table.level_unlock, write_list, "MainRAM"),
-                    (self.address_table.zones_unlock, [5], "MainRAM"),
+                    (self.address_table.level_unlock_flags, write_list, "MainRAM"),
+                    (self.address_table.zone_unlocked_count, [5], "MainRAM"),
                 ],
             )
         else:

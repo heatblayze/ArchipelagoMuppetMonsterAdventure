@@ -10,8 +10,8 @@ class AddressTable(NamedTuple):
     active_level_name: int
     bosses_beaten: int
     level_state_start: int  # presumably these are all in uniform blocks, so we only need the start
-    level_unlock: int
-    zones_unlock: int
+    level_unlock_flags: int
+    zone_unlocked_count: int
     amulets: int
     power_glove: int
     spin_attack: int
@@ -30,8 +30,8 @@ game_version_addresses: dict[str, AddressTable] = {
         # TODO: this is kinda wrong, since it starts after some data we don't care about.
         # We should update this to include said data, and then just ignore it.
         level_state_start=0x0CCB86,
-        level_unlock=0x0AA0C4,
-        zones_unlock=0x0E22F0,
+        level_unlock_flags=0x0AA0C4,
+        zone_unlocked_count=0x0E22F0,
         amulets=0x0CCB78,
         power_glove=0,  # TODO: on my other pc....
         spin_attack=0,  # TODO: on my other pc....
