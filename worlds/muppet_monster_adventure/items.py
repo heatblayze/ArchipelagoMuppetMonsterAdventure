@@ -64,7 +64,7 @@ trap_items_table: list[MMATrapItemData] = [
     MMATrapItemData(TrapType.LOSE_LIFE),
 ]
 
-all_items_table: Sequence[MMAItemData] = [
+required_items_table: Sequence[MMAItemData] = [
     # Abilities
     MMAAbilityItemData("Gliding", AbilityFlag.GLIDE),
     MMAAbilityItemData("Climbing", AbilityFlag.CLIMB),
@@ -78,6 +78,10 @@ all_items_table: Sequence[MMAItemData] = [
     MMALevelItemData(LevelName.HALLWAYS_OF_DOOM),
     MMALevelItemData(LevelName.POKER_FACES),
     MMALevelItemData(LevelName.NOSEFERATU),
+]
+
+__all_items_table: Sequence[MMAItemData] = [
+    *required_items_table,
     *filler_items_table,
     *trap_items_table,
 ]
@@ -86,7 +90,7 @@ item_name_to_id: dict[str, int] = {}
 item_id_to_item: dict[int, MMAItemData] = {}
 ability_to_item: dict[AbilityFlag, MMAItemData] = {}
 __max_level_index = 0
-for idx, item in enumerate(all_items_table):
+for idx, item in enumerate(__all_items_table):
     item_name_to_id.update({str(item.name): base_id + idx})
     item_id_to_item.update({base_id + idx: item})
     if type(item) is MMALevelItemData:
@@ -96,6 +100,6 @@ for idx, item in enumerate(all_items_table):
         ability_to_item.update({item.ability_type: item})
 
 item_name_groups: dict[str, set[str]] = {}
-for item in all_items_table:
+for item in __all_items_table:
     name: str = ""
     item_name_groups.update({item.group: (item_name_groups.get(item.group) or set()) | {item.name}})

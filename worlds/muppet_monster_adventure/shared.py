@@ -4,6 +4,7 @@ base_id: int = 25_899_560
 game_name: str = "Muppet Monster Adventure"
 
 
+# Flag because this is used for logic
 class AbilityFlag(Flag):
     GLIDE = auto()
     CLIMB = auto()
