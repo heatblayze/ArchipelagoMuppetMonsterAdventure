@@ -54,10 +54,9 @@ class MMABossRegion(MMARegion):
         self,
         name: LevelName,
         identifier: str,
-        energy_count: int,
         locations: list[MMALocationData],
     ) -> None:
-        super().__init__(name, identifier, energy_count, locations)
+        super().__init__(name, identifier, 0, locations)
         pass
 
 
@@ -376,7 +375,6 @@ all_locations_table: list[MMARegion] = [
     MMABossRegion(
         LevelName.NOSEFERATU,
         "CASTLEB",
-        0,
         [MMALocationData("Boss defeated", LocationType.BOSS, [AbilityFlag.GLOVE])],
     ),
 ]
