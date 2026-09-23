@@ -39,15 +39,25 @@ class MMARegion:
         self,
         name: LevelName,
         identifier: str,
-        state_address: int | None,
         energy_count: int,
         locations: list[MMALocationData],
     ) -> None:
         self.name: str = name.value
         self.identifier: str = identifier
-        self.state_address: int | None = state_address  # TODO: once we implement the LUT, this won't be necessary
         self.energy_count: int = energy_count
         self.locations: list[MMALocationData] = locations
+        pass
+
+
+class MMABossRegion(MMARegion):
+    def __init__(
+        self,
+        name: LevelName,
+        identifier: str,
+        energy_count: int,
+        locations: list[MMALocationData],
+    ) -> None:
+        super().__init__(name, identifier, energy_count, locations)
         pass
 
 
@@ -63,7 +73,6 @@ all_locations_table: list[MMARegion] = [
     MMARegion(
         LevelName.PEACOCK_PURGATORY,
         "CASTLE1",
-        0x0CCB86,
         300,
         [
             # Amulets
@@ -180,7 +189,6 @@ all_locations_table: list[MMARegion] = [
     MMARegion(
         LevelName.HALLWAYS_OF_DOOM,
         "CASTLE2",
-        0x0CCBEE,
         320,
         [
             # Amulets
@@ -278,7 +286,6 @@ all_locations_table: list[MMARegion] = [
     MMARegion(
         LevelName.POKER_FACES,
         "CASTLE3",
-        0x0CCC56,
         350,
         [
             # Amulets
@@ -366,10 +373,9 @@ all_locations_table: list[MMARegion] = [
             ),
         ],
     ),
-    MMARegion(
+    MMABossRegion(
         LevelName.NOSEFERATU,
         "CASTLEB",
-        None,
         0,
         [MMALocationData("Boss defeated", LocationType.BOSS, [AbilityFlag.GLOVE])],
     ),
@@ -377,6 +383,9 @@ all_locations_table: list[MMARegion] = [
 
 # Maps region name to the region data definition
 region_lookup: dict[str, MMARegion] = {region.name: region for region in all_locations_table}
+non_boss_region_lookup: dict[str, MMARegion] = {
+    region.name: region for region in all_locations_table if type(region) is MMARegion
+}
 
 # Lists all locations, by type
 location_type_lookup: dict[LocationType, list[MMALocationData]] = {}
