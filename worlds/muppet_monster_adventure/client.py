@@ -89,8 +89,6 @@ class MMALevelState(MMAAddressTableConsumer):
 
         # State
         self.bonus: MMAFlagField = MMAFlagField(size=5, offset=0)
-        # self.coins: int = 0
-        self.tokens: int = 0
         self.energy: int = 0
         self.current_energy_threshold: int = -1
         self.last_pickup_addr: int = 0
@@ -117,9 +115,6 @@ class MMALevelState(MMAAddressTableConsumer):
         last_pickup = int.from_bytes(all_bytes[1], byteorder="little")
 
         bonus_changes = self.bonus.update(state_data[0])  # Single byte order doesn't matter
-        updated_tokens = state_data[1]
-        # TODO: coins should be done like tokens
-        # coins = int.from_bytes(data[2:4], byteorder="little")
         updated_energy = int.from_bytes(state_data[4:6], byteorder="little")
 
         collected_locations: list[int] = []
@@ -128,6 +123,7 @@ class MMALevelState(MMAAddressTableConsumer):
             collected_locations.extend([bonus_location_lookup[idx].ap_id() for idx in bonus_changes])
 
         if updated_energy > self.energy:
+            self.energy = updated_energy
             if self.current_energy_threshold + 1 < len(self.energy_thresholds):
                 energy_location_lookup = self.location_lookup[LocationType.ENERGY]
                 for i in range(self.current_energy_threshold + 1, len(self.energy_thresholds)):
@@ -144,16 +140,10 @@ class MMALevelState(MMAAddressTableConsumer):
                     self.collected_tokens[i]
                     collected_locations.append(token_location_lookup[i].ap_id())
                     break
-
-        # Sometimes fields like these are flipped up and down for effect.
-        # Don't know if these specifically are, but better safe than sorry.
-        self.energy = max(updated_energy, self.energy)
-        # self.coins = max(coins, self.coins)
-        self.tokens = max(updated_tokens, self.tokens)
         return collected_locations
 
     def print(self) -> str:
-        return f"Tokens: {self.tokens}, Energy: {self.energy}, Bonus: {self.bonus.flags}"
+        return f"Tokens: {self.collected_tokens}, Energy: {self.energy}, Bonus: {self.bonus.flags}"
 
 
 class MMAAmuletState:
