@@ -22,11 +22,30 @@ ntsc_addresses = AddressTable(
     level_pickup_data={
         LevelName.PEACOCK_PURGATORY: PickupAddresses(
             tokens=[
-                0x0,
-                0x0,
-                0x0,
-                0x0,
+                0x01F2964,
+                0x01F2938,
+                0x01F4678,
+                0x01F66C0,
+                0x01EF998,
             ]
-        )
+        ),
+        LevelName.HALLWAYS_OF_DOOM: PickupAddresses(
+            tokens=[
+                0x01F53F4,
+                0x01F2548,
+                0x01F52D0,
+                0x01F2574,
+                0x01EEEC8,
+            ]
+        ),
+        LevelName.POKER_FACES: PickupAddresses(
+            tokens=[
+                0x01F87BC,
+                0x01F69B8,
+                0x01F86A8,
+                0x01F69E4,
+                0x01F3724,
+            ]
+        ),
     },
 )

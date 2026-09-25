@@ -1,6 +1,6 @@
 from enum import Enum
 
-from .shared import AbilityFlag, LevelName, base_id
+from .shared import AbilityFlag, LevelName, any_weapon_flag, base_id
 
 
 class LocationType(Enum):
@@ -114,7 +114,7 @@ all_locations_table: list[MMARegion] = [
                 LocationType.MUCK_MONSTER_AMULET,
             ),
             MMALocationData(
-                "Noseferatu Amulet - Up super-jump platform",
+                "Noseferatu Amulet - Up Super Jump Pad",
                 LocationType.NOSEFERATU_AMULET,
             ),
             MMALocationData(
@@ -144,26 +144,26 @@ all_locations_table: list[MMARegion] = [
             ),
             # Tokens
             MMALocationData(
-                "1st Muppet Token",
+                "Muppet Token - By exit",
                 LocationType.TOKEN,
             ),
             MMALocationData(
-                "2nd Muppet Token",
+                "Muppet Token - Up Super Jump Pad",
                 LocationType.TOKEN,
             ),
             MMALocationData(
-                "3rd Muppet Token",
+                "Muppet Token - Race Percy",
                 LocationType.TOKEN,
             ),
             MMALocationData(
-                "4th Muppet Token",
+                "Muppet Token - Sunflower minigame",
                 LocationType.TOKEN,
-                [AbilityFlag.GLIDE, AbilityFlag.GLOVE, AbilityFlag.CLIMB],  # BONUS or climb tower
+                [AbilityFlag.GLIDE | AbilityFlag.CLIMB],
             ),
             MMALocationData(
-                "5th Muppet Token",
+                "Muppet Token - BONUS",
                 LocationType.TOKEN,
-                [AbilityFlag.CLIMB | AbilityFlag.GLIDE],  # BONUS & climb tower
+                [AbilityFlag.GLIDE, AbilityFlag.GLOVE],
             ),
             # Bonus
             MMALocationData(
@@ -224,39 +224,29 @@ all_locations_table: list[MMARegion] = [
             ),
             # Tokens
             MMALocationData(
-                "1st Muppet Token",
+                "Muppet Token - Rizzo",
                 LocationType.TOKEN,
-                [
-                    AbilityFlag.SMASH | AbilityFlag.GLOVE,  # Rizzo
-                    AbilityFlag.SMASH | AbilityFlag.SPIN,  # Rizzo
-                ],
+                [*any_weapon_flag(AbilityFlag.SMASH)],
             ),
             MMALocationData(
-                "2nd Muppet Token",
+                "Muppet Token - On top of the bookshelves",
                 LocationType.TOKEN,
-                [
-                    AbilityFlag.SMASH | AbilityFlag.CLIMB,  # Library
-                    AbilityFlag.SMASH | AbilityFlag.GLOVE,  # Smashing minigame
-                ],
+                [AbilityFlag.SMASH | AbilityFlag.GLOVE | AbilityFlag.CLIMB],
             ),
             MMALocationData(
-                "3rd Muppet Token",
+                "Muppet Token - Smashing minigame",
                 LocationType.TOKEN,
-                [
-                    AbilityFlag.SMASH | AbilityFlag.GLOVE,  # Final near level exit switch
-                ],
+                [AbilityFlag.SMASH | AbilityFlag.GLOVE],
             ),
             MMALocationData(
-                "4th Muppet Token",
+                "Muppet Token - Near smashable door",
                 LocationType.TOKEN,
-                [
-                    AbilityFlag.SMASH | AbilityFlag.CLIMB | AbilityFlag.GLOVE,  # Rizzo + library + smashing + switch
-                ],
+                [AbilityFlag.SMASH | AbilityFlag.GLOVE],
             ),
             MMALocationData(
-                "5th Muppet Token",
+                "Muppet Token - BONUS",
                 LocationType.TOKEN,
-                [AbilityFlag.SMASH | AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],  # All + BONUS
+                [AbilityFlag.SMASH | AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE],
             ),
             # Bonus
             MMALocationData(
@@ -321,34 +311,29 @@ all_locations_table: list[MMARegion] = [
             ),
             # Tokens
             MMALocationData(
-                "1st Muppet Token",
+                "Muppet Token - Target shooting minigame",
                 LocationType.TOKEN,
-                [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE],  # Target shooting
+                [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
             ),
             MMALocationData(
-                "2nd Muppet Token",
+                "Muppet Token - Standing pillar by start",
                 LocationType.TOKEN,
                 [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE],  # After shooting Beaker
             ),
             MMALocationData(
-                "3rd Muppet Token",
+                "Muppet Token - Block minigame",
                 LocationType.TOKEN,
-                [
-                    AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SPIN,  # Block minigame
-                    AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.CLIMB,  # After minigame
-                ],
+                [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SPIN],
             ),
             MMALocationData(
-                "4th Muppet Token",
+                "Muppet Token - Glide to the rooftop",
                 LocationType.TOKEN,
-                [
-                    AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.CLIMB,  # BONUS
-                ],
+                [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.CLIMB],
             ),
             MMALocationData(
-                "5th Muppet Token",
+                "Muppet Token - BONUS",
                 LocationType.TOKEN,
-                [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.SPIN],
+                [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.CLIMB],
             ),
             # Bonus
             MMALocationData(
