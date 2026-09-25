@@ -101,6 +101,10 @@ class MMALevelState(MMAAddressTableConsumer):
                 f"Client expects {len(self.energy_thresholds)} but the level has {len(self.location_lookup[LocationType.ENERGY])}",
             )
 
+    # TODO: Need a method to validate all of this data on connect,
+    # since the game stores all permanent pickups just after the level's general data.
+    # It should include a param indicating whether this is the active level, since persisted level
+    # data is only updated when the player returns to the Hub.
     async def update(self, ctx: "BizHawkClientContext") -> list[int]:
         # TODO: technically we could do visit-sanity if we wanted, since the game tracks it.
         # Would need to adjust all of this though, since it's 2 bytes prior to the Bonus.
@@ -127,6 +131,7 @@ class MMALevelState(MMAAddressTableConsumer):
             if self.current_energy_threshold + 1 < len(self.energy_thresholds):
                 energy_location_lookup = self.location_lookup[LocationType.ENERGY]
                 for i in range(self.current_energy_threshold + 1, len(self.energy_thresholds)):
+                    # Floor to ensure there's no weird edge-cases with the floats
                     target = floor(self.energy_thresholds[i] * self.max_energy)
                     if self.energy >= target:
                         collected_locations.append(energy_location_lookup[i].ap_id())
@@ -372,15 +377,6 @@ class MMAGameState(MMAAddressTableConsumer):
             if len(amulet_collections) > 0:
                 # TODO: do we want to do anything with this information?
                 _ = await ctx.check_locations(amulet_collections)
-
-        # TODO: Token data should checked via the `level_last_pickup`:
-        # - Pull the `level_last_pickup` value, and compare to last frame
-        # - If changed, compare against current level's token addresses (and have not already been collected)
-        # - Emit changes
-        # We can also validate all of this data on connect, since the game stores all permanent pickups
-        # just after the level's general data.
-        # If the player is in a level however, we would also need to check the current level's active state
-        # by directly reading each token's state, since the level state is not updated until leaving.
 
         if (level := self.level_states.get(self.active_level_name)) is not None:
             level_changes = await level.update(ctx)
