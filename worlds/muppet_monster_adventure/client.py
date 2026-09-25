@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, ClassVar, NamedTuple
 
-from worlds.muppet_monster_adventure.addresses import AddressTable, game_version_addresses
+from .addresses.ntsc import ntsc_addresses
+from .addresses.structs import AddressTable
 
 if TYPE_CHECKING:
     from worlds._bizhawk.context import BizHawkClientContext
@@ -131,8 +132,33 @@ class MMAPlayerState(MMAAddressTableConsumer):
     def __init__(self, address_table: AddressTable) -> None:
         super().__init__(address_table)
         self.morphs: MMAMorphState = MMAMorphState()
+        self.glove: bool = False
+        self.spin: bool = False
         # Limit the maximum health and lives to this number
         self.max_limit: int = 100
+
+    async def update(self, ctx: "BizHawkClientContext") -> None:
+        if not self.spin and not self.glove:
+            # Both of these need to be frozen.
+            # The glove's value doesn't really matter.
+            await bizhawk.write(
+                ctx.bizhawk_ctx,
+                [
+                    (self.address_table.power_glove, [0], "MainRAM"),
+                    (self.address_table.spin_attack, [0], "MainRAM"),
+                ],
+            )
+        elif not self.spin:
+            await bizhawk.write(ctx.bizhawk_ctx, [(self.address_table.spin_attack, [0], "MainRAM")])
+        else:
+            # No glove, but yes spin
+            await bizhawk.write(ctx.bizhawk_ctx, [(self.address_table.power_glove, [0], "MainRAM")])
+            # Spin only needs to be written to if it's zero
+            _ = await bizhawk.guarded_write(
+                ctx.bizhawk_ctx,
+                [(self.address_table.spin_attack, [1], "MainRAM")],
+                [(self.address_table.spin_attack, [0], "MainRAM")],
+            )
 
     async def change_current_health(self, increase: bool, ctx: "BizHawkClientContext"):
         # Grab the current health and the max health
@@ -394,6 +420,11 @@ class MMAClient(BizHawkClient):
     game_identifier_size: int = 11
     level_name_size: int = 10
 
+    version_addresses: ClassVar[dict[str, AddressTable]] = {
+        "SLUS_012.38": ntsc_addresses,
+        # "SCES_024.03": pal_aunz_addresses,
+    }
+
     def __init__(self):
         super().__init__()
 
@@ -413,7 +444,7 @@ class MMAClient(BizHawkClient):
     async def validate_rom(self, ctx: "BizHawkClientContext") -> bool:
         try:
             found_table: AddressTable | None = None
-            for name, table in game_version_addresses.items():
+            for name, table in self.version_addresses.items():
                 rom_name = (
                     (
                         await bizhawk.read(
