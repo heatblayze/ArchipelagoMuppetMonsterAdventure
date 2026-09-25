@@ -4,6 +4,7 @@ from worlds.AutoWorld import World
 
 from .client import *  # noqa: F403
 from .items import (
+    MMAAbilityItemData,
     MMALevelItemData,
     ability_to_item,
     filler_items_table,
@@ -19,7 +20,7 @@ from .locations import (
     location_name_to_id,
     location_type_lookup,
 )
-from .shared import LevelName, game_name, whitelisted_starting_levels
+from .shared import AbilityFlag, LevelName, game_name, whitelisted_starting_levels
 
 
 class MMAItem(Item):
@@ -45,18 +46,20 @@ class MuppetMonsterAdventureWorld(World):
     def __init__(self, multiworld: MultiWorld, player: int):
         super().__init__(multiworld, player)
         self.starting_level: Item
-        self.location_count = 0
+        self.starter_items: list[Item] = []
+        self.location_count: int = 0
         self.goal_locations: list[tuple[str, str]] = []
 
     def get_filler_item_name(self) -> str:
         return "Heart"
 
     def get_pre_fill_items(self) -> list["Item"]:
-        return [self.starting_level]
+        return [self.starting_level, *self.starter_items]
 
     def pre_fill(self) -> None:
         super().pre_fill()
-        self.push_precollected(self.starting_level)
+        for item in self.get_pre_fill_items():
+            self.push_precollected(item)
         return
 
     def create_regions(self) -> None:
@@ -86,7 +89,12 @@ class MuppetMonsterAdventureWorld(World):
         for item_def in required_items_table:
             item = MMAItem(item_def.name, item_def.classification, item_name_to_id[item_def.name], self.player)
             if type(item_def) is not MMALevelItemData or item_def.name != starter_level_name:
-                pool.append(item)
+                if type(item_def) is MMAAbilityItemData and (
+                    item_def.ability_type == AbilityFlag.GLOVE or item_def.ability_type == AbilityFlag.SPIN
+                ):
+                    self.starter_items.append(item)
+                else:
+                    pool.append(item)
             else:
                 self.starting_level = item
 
