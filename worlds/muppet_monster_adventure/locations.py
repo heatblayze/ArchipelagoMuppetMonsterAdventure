@@ -66,9 +66,8 @@ class MMABossRegion(MMARegion):
 # TODO: currently we're assuming checks can be done without caring about taking damage
 # The iframes are very lenient, allowing you to get past basically every enemy,
 # and the levels tend to have a good number of recovery hearts.
-# Most enemies also stand in place, and are melee only.
+# BUT!! (and this is a big BUTT) the game does get notably harder to play this way after zone 1.
 # Playtesting is required here...
-# If we want to keep it as-is, we should at least make it an option (at least for zone 2+)
 
 # TODO: tokens are no longer a count, but individual locations.
 
