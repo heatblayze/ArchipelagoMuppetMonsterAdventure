@@ -4,7 +4,7 @@ from ..shared import LevelName
 
 
 class PickupAddresses(NamedTuple):
-    """The collection of addresses for each level's tokens.
+    """The collection of addresses for each level's pickups.
     Note that these should be the addresses of the ACTUAL data, NOT the address
     which stores the POINTER to the data.
     These values are used at runtime to compare against the `level_last_pickup` value."""
