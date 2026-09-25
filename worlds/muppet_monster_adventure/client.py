@@ -211,7 +211,7 @@ class MMAGameState(MMAAddressTableConsumer):
         self.level_states: dict[str, MMALevelState] = {
             region.identifier: MMALevelState(
                 region.name,
-                address_table.level_state_start + (i * MMALevelState.level_state_size),
+                address_table.level_state + (i * MMALevelState.level_state_size),
                 region.energy_count,
             )
             for i, region in enumerate(non_boss_region_lookup.values())
@@ -245,7 +245,7 @@ class MMAGameState(MMAAddressTableConsumer):
             await bizhawk.write(
                 ctx.bizhawk_ctx,
                 [
-                    (self.address_table.level_unlock_flags, write_list, "MainRAM"),
+                    (self.address_table.level_unlock_states, write_list, "MainRAM"),
                     (self.address_table.zone_unlocked_count, [5], "MainRAM"),
                 ],
             )
