@@ -1,5 +1,5 @@
 from ..shared import LevelName
-from .structs import AddressTable, TokenAddresses
+from .structs import AddressTable, PickupAddresses
 
 ntsc_addresses = AddressTable(
     game_identifier=0x009274,
@@ -18,13 +18,15 @@ ntsc_addresses = AddressTable(
     # TODO: this is kinda wrong, since it starts after some data we don't care about.
     # We should update this to include said data, and then just ignore it.
     level_state=0x0CCB86,
-    level_last_pickup=0x0B8698,
-    level_token_data={
-        LevelName.PEACOCK_PURGATORY: TokenAddresses(
-            token_1=0x0,
-            token_2=0x0,
-            token_3=0x0,
-            token_4=0x0,
+    last_pickup=0x0B8698,
+    level_pickup_data={
+        LevelName.PEACOCK_PURGATORY: PickupAddresses(
+            tokens=[
+                0x0,
+                0x0,
+                0x0,
+                0x0,
+            ]
         )
     },
 )

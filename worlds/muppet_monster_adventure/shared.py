@@ -50,3 +50,10 @@ class TrapType(StrEnum):
     LOSE_HEALTH = "Ouch!"
     LOSE_HEART = "Fly Away"
     LOSE_LIFE = "No Life Gaming"
+
+
+class LevelConfigurationException(Exception):
+    """Exception raised when a level has been configured incorrectly."""
+
+    def __init__(self, name: LevelName, message: str):
+        super().__init__(f"Level '{name}' has been configured incorrectly: {message}")

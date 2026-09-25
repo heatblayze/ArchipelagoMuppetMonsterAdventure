@@ -1,19 +1,15 @@
 from typing import NamedTuple
 
-from worlds.muppet_monster_adventure.shared import LevelName
+from ..shared import LevelName
 
 
-class TokenAddresses(NamedTuple):
+class PickupAddresses(NamedTuple):
     """The collection of addresses for each level's tokens.
     Note that these should be the addresses of the ACTUAL data, NOT the address
     which stores the POINTER to the data.
     These values are used at runtime to compare against the `level_last_pickup` value."""
 
-    token_1: int
-    token_2: int
-    token_3: int
-    token_4: int
-    token_5: int | None = None
+    tokens: list[int]
 
 
 class AddressTable(NamedTuple):
@@ -63,8 +59,8 @@ class AddressTable(NamedTuple):
     level_state: int
     """Level energy, coin, bonus, and token count"""
 
-    level_last_pickup: int
+    last_pickup: int
     """Stores the memory address of the last pickup"""
 
-    level_token_data: dict[LevelName, TokenAddresses]
+    level_pickup_data: dict[LevelName, PickupAddresses]
     """Lists the memory addresses of pickups, for each level"""

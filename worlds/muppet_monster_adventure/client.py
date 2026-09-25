@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING, ClassVar, NamedTuple
+from math import floor
+from typing import TYPE_CHECKING, ClassVar
 
 from .addresses.ntsc import ntsc_addresses
-from .addresses.structs import AddressTable
+from .addresses.structs import AddressTable, PickupAddresses
 
 if TYPE_CHECKING:
     from worlds._bizhawk.context import BizHawkClientContext
@@ -13,13 +14,15 @@ from worlds._bizhawk.client import BizHawkClient
 from .items import MMAAbilityItemData, MMAFillerItemData, MMALevelItemData, MMATrapItemData, item_id_to_item
 from .locations import (
     LocationType,
+    MMALocationData,
+    MMARegion,
     location_name_to_id,
     location_type_lookup,
     location_type_lookup_by_region,
     non_boss_region_lookup,
     region_lookup,
 )
-from .shared import AbilityFlag, FillerType, TrapType, game_name
+from .shared import AbilityFlag, FillerType, LevelConfigurationException, LevelName, TrapType, game_name
 
 
 class MMAAddressTableConsumer:
@@ -40,7 +43,7 @@ class MMAFlagField:
             new_flags[i] = ((data >> self.offset + i) & 1) == 1
         return new_flags
 
-    def process_changes(self, data: int) -> list[int]:
+    def update(self, data: int) -> list[int]:
         new_flags = self.split_flags(data)
         changes: list[int] = []
         for i in range(self.size):
@@ -63,56 +66,91 @@ class MMAMorphState:
         return packed_data.to_bytes(2, "little")
 
 
-class LevelUpdate(NamedTuple):
-    previous_energy: int
-    previous_tokens: int
-    energy: int | None
-    tokens: int | None
-    bonus_changes: list[int] | None
-
-
-class MMALevelState:
+class MMALevelState(MMAAddressTableConsumer):
     level_state_size: int = 6
+    last_pickup_size: int = 3
 
     def __init__(
         self,
-        name: str,
-        address: int,
-        max_energy: int,
+        address_table: AddressTable,
+        region: MMARegion,
+        state_address: int,
+        energy_thresholds: list[float],
     ) -> None:
-        self.name: str = name
-        self.address: int = address
-        self.max_energy: int = max_energy
+        super().__init__(address_table)
+        self.region: MMARegion = region
+        self.state_address: int = state_address
+        self.energy_thresholds: list[float] = energy_thresholds
+        self.max_energy: int = self.region.energy_count
+        self.location_lookup: dict[LocationType, list[MMALocationData]] = location_type_lookup_by_region[
+            self.region.name
+        ]
+        self.pickup_addresses: PickupAddresses = self.address_table.level_pickup_data[LevelName(self.region.name)]
+
+        # State
         self.bonus: MMAFlagField = MMAFlagField(size=5, offset=0)
         # self.coins: int = 0
         self.tokens: int = 0
         self.energy: int = 0
+        self.current_energy_threshold: int = -1
+        self.last_pickup_addr: int = 0
+        self.collected_tokens: list[bool] = [False] * 5
 
-    # TODO: this should just return the location ids which were collected
-    async def process_changes(self, ctx: "BizHawkClientContext") -> LevelUpdate:
+        # Validation
+        if len(self.location_lookup[LocationType.ENERGY]) != len(self.energy_thresholds):
+            raise LevelConfigurationException(
+                LevelName(self.region.name),
+                f"Client expects {len(self.energy_thresholds)} but the level has {len(self.location_lookup[LocationType.ENERGY])}",
+            )
+
+    async def update(self, ctx: "BizHawkClientContext") -> list[int]:
         # TODO: technically we could do visit-sanity if we wanted, since the game tracks it.
         # Would need to adjust all of this though, since it's 2 bytes prior to the Bonus.
-        data = (await bizhawk.read(ctx.bizhawk_ctx, [(self.address, self.level_state_size, "MainRAM")]))[0]
-
-        bonus_changes = self.bonus.process_changes(data[0])
-        updated_tokens = data[1]
-        # coins = int.from_bytes(data[2:4], byteorder="little")
-        updated_energy = int.from_bytes(data[4:6], byteorder="little")
-
-        update = LevelUpdate(
-            self.energy,
-            self.tokens,
-            updated_energy if updated_energy > self.energy else None,
-            updated_tokens if updated_tokens > self.tokens else None,
-            bonus_changes if len(bonus_changes) > 0 else None,
+        all_bytes = await bizhawk.read(
+            ctx.bizhawk_ctx,
+            [
+                (self.state_address, self.level_state_size, "MainRAM"),
+                (self.address_table.last_pickup, self.last_pickup_size, "MainRAM"),
+            ],
         )
+        state_data = all_bytes[0]
+        last_pickup = int.from_bytes(all_bytes[1], byteorder="little")
+
+        bonus_changes = self.bonus.update(state_data[0])  # Single byte order doesn't matter
+        updated_tokens = state_data[1]
+        # TODO: coins should be done like tokens
+        # coins = int.from_bytes(data[2:4], byteorder="little")
+        updated_energy = int.from_bytes(state_data[4:6], byteorder="little")
+
+        collected_locations: list[int] = []
+        if len(bonus_changes) > 0:
+            bonus_location_lookup = self.location_lookup[LocationType.BONUS]
+            collected_locations.extend([bonus_location_lookup[idx].ap_id() for idx in bonus_changes])
+
+        if updated_energy > self.energy:
+            if self.current_energy_threshold + 1 < len(self.energy_thresholds):
+                energy_location_lookup = self.location_lookup[LocationType.ENERGY]
+                for i in range(self.current_energy_threshold + 1, len(self.energy_thresholds)):
+                    target = floor(self.energy_thresholds[i] * self.max_energy)
+                    if self.energy >= target:
+                        collected_locations.append(energy_location_lookup[i].ap_id())
+                        self.current_energy_threshold = i
+
+        if last_pickup != self.last_pickup_addr:
+            self.last_pickup_addr = last_pickup
+            token_location_lookup = self.location_lookup[LocationType.TOKEN]
+            for i, token_addr in enumerate(self.pickup_addresses.tokens):
+                if self.last_pickup_addr == token_addr:
+                    self.collected_tokens[i]
+                    collected_locations.append(token_location_lookup[i].ap_id())
+                    break
 
         # Sometimes fields like these are flipped up and down for effect.
         # Don't know if these specifically are, but better safe than sorry.
         self.energy = max(updated_energy, self.energy)
         # self.coins = max(coins, self.coins)
         self.tokens = max(updated_tokens, self.tokens)
-        return update
+        return collected_locations
 
     def print(self) -> str:
         return f"Tokens: {self.tokens}, Energy: {self.energy}, Bonus: {self.bonus.flags}"
@@ -124,8 +162,8 @@ class MMAAmuletState:
         self.flags: MMAFlagField = MMAFlagField(4, offset)
 
     # TODO: this should return location ids
-    def process_changes(self, data: int) -> list[int]:
-        return self.flags.process_changes(data)
+    def update(self, data: int) -> list[int]:
+        return self.flags.update(data)
 
 
 class MMAPlayerState(MMAAddressTableConsumer):
@@ -202,7 +240,12 @@ class MMAPlayerState(MMAAddressTableConsumer):
 
 
 class MMAGameState(MMAAddressTableConsumer):
-    def __init__(self, address_table: AddressTable, boss_goal_count: int) -> None:
+    def __init__(
+        self,
+        address_table: AddressTable,
+        boss_goal_count: int,
+        energy_thresholds: list[float],
+    ) -> None:
         super().__init__(address_table)
         self.boss_goal_count: int = boss_goal_count
 
@@ -210,9 +253,10 @@ class MMAGameState(MMAAddressTableConsumer):
         self.bosses_beaten: list[bool] = [False] * 5
         self.level_states: dict[str, MMALevelState] = {
             region.identifier: MMALevelState(
-                region.name,
+                self.address_table,
+                region,
                 address_table.level_state + (i * MMALevelState.level_state_size),
-                region.energy_count,
+                energy_thresholds,
             )
             for i, region in enumerate(non_boss_region_lookup.values())
         }
@@ -326,7 +370,7 @@ class MMAGameState(MMAAddressTableConsumer):
             # Extract amulet pickup changes
             amulet_collections: list[int] = []
             for amulet_type, state in self.amulets.items():
-                changes = state.process_changes(flags_int)
+                changes = state.update(flags_int)
                 # TODO: emit location collection
                 if len(changes) > 0:
                     logger.info(f"'{amulet_type}' changes - {changes}")
@@ -349,43 +393,9 @@ class MMAGameState(MMAAddressTableConsumer):
         # by directly reading each token's state, since the level state is not updated until leaving.
 
         if (level := self.level_states.get(self.active_level_name)) is not None:
-            level_state_collections: list[int] = []
-            region_lookup = location_type_lookup_by_region[level.name]
-
-            level_changes = await level.process_changes(ctx)
-            # Energy changes
-            if level_changes.energy is not None:
-                half_energy = level.max_energy / 2
-                if level.energy >= half_energy and level_changes.previous_energy < half_energy:
-                    # Emit 50% energy
-                    location = region_lookup[LocationType.ENERGY][0]
-                    ap_id = location_name_to_id[location.full_identifier]
-                    level_state_collections.append(ap_id)
-                    pass
-                elif level.energy == level.max_energy and level_changes.previous_energy < level.max_energy:
-                    # Emit 100% energy
-                    location = region_lookup[LocationType.ENERGY][1]
-                    ap_id = location_name_to_id[location.full_identifier]
-                    level_state_collections.append(ap_id)
-                    pass
-            # Token changes
-            if level_changes.tokens is not None:
-                for i in range(level_changes.tokens - level_changes.previous_tokens):
-                    location = region_lookup[LocationType.TOKEN][level_changes.previous_tokens + i]
-                    ap_id = location_name_to_id[location.full_identifier]
-                    level_state_collections.append(ap_id)
-                pass
-
-            # Bonus changes
-            if level_changes.bonus_changes is not None:
-                for idx in level_changes.bonus_changes:
-                    location = region_lookup[LocationType.BONUS][idx]
-                    ap_id = location_name_to_id[location.full_identifier]
-                    level_state_collections.append(ap_id)
-                pass
-
-            if len(level_state_collections) > 0:
-                _ = await ctx.check_locations(level_state_collections)
+            level_changes = await level.update(ctx)
+            if len(level_changes) > 0:
+                _ = await ctx.check_locations(level_changes)
             pass
         else:
             # TODO: Find a better method of checking this
@@ -445,8 +455,8 @@ class MMAClient(BizHawkClient):
         self.address_table: AddressTable
 
     def init_state(self, level_name: str | None = None) -> None:
-        # TODO: goal options?
-        self.state = MMAGameState(self.address_table, 1)
+        # TODO: options
+        self.state = MMAGameState(self.address_table, 1, [0.5, 1.0])
         if level_name is not None:
             self.state.active_level_name = level_name
 

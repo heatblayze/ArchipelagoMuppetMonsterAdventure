@@ -33,6 +33,9 @@ class MMALocationData:
         self.ability_requirements = ability_requirements
         self.full_identifier: str = ""
 
+    def ap_id(self) -> int:
+        return location_name_to_id[self.full_identifier]
+
 
 class MMARegion:
     def __init__(
@@ -66,6 +69,8 @@ class MMABossRegion(MMARegion):
 # Most enemies also stand in place, and are melee only.
 # Playtesting is required here...
 # If we want to keep it as-is, we should at least make it an option (at least for zone 2+)
+
+# TODO: tokens are no longer a count, but individual locations.
 
 # Note: The order of basically all of these matters, since the client depends on this to check world state.
 all_locations_table: list[MMARegion] = [
@@ -401,7 +406,7 @@ location_name_to_id: dict[str, int] = {}
 __running_idx = 0
 for region_data in all_locations_table:
     for location in region_data.locations:
-        location.full_identifier = f"{region_data.name} - {location.name}"
+        location.full_identifier = f"{region_data.name}: {location.name}"
         location_name_to_id.update({location.full_identifier: base_id + __running_idx})
         __running_idx += 1
 
