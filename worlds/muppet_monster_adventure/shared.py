@@ -41,7 +41,7 @@ whitelisted_starting_levels: list[LevelName] = [
 
 
 class FillerType(StrEnum):
-    GAIN_HEALTH = "Gain Health"
+    GAIN_HEALTH = "Heart"
     GAIN_HEART = "Fly Heart"
     GAIN_LIFE = "Extra Life"
 

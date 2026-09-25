@@ -43,7 +43,7 @@ class MMAFlagField:
             new_flags[i] = ((data >> self.offset + i) & 1) == 1
         return new_flags
 
-    def update(self, data: int) -> list[int]:
+    def check(self, data: int) -> list[int]:
         new_flags = self.split_flags(data)
         changes: list[int] = []
         for i in range(self.size):
@@ -67,7 +67,8 @@ class MMAMorphState:
 
 
 class MMALevelState(MMAAddressTableConsumer):
-    level_state_size: int = 6
+    level_state_total_size: int = 104
+    level_state_relevant_size: int = 6
     last_pickup_size: int = 3
 
     def __init__(
@@ -105,20 +106,20 @@ class MMALevelState(MMAAddressTableConsumer):
     # since the game stores all permanent pickups just after the level's general data.
     # It should include a param indicating whether this is the active level, since persisted level
     # data is only updated when the player returns to the Hub.
-    async def update(self, ctx: "BizHawkClientContext") -> list[int]:
+    async def check_locations(self, ctx: "BizHawkClientContext") -> list[int]:
         # TODO: technically we could do visit-sanity if we wanted, since the game tracks it.
         # Would need to adjust all of this though, since it's 2 bytes prior to the Bonus.
         all_bytes = await bizhawk.read(
             ctx.bizhawk_ctx,
             [
-                (self.state_address, self.level_state_size, "MainRAM"),
+                (self.state_address, self.level_state_relevant_size, "MainRAM"),
                 (self.address_table.last_pickup, self.last_pickup_size, "MainRAM"),
             ],
         )
         state_data = all_bytes[0]
         last_pickup = int.from_bytes(all_bytes[1], byteorder="little")
 
-        bonus_changes = self.bonus.update(state_data[0])  # Single byte order doesn't matter
+        bonus_changes = self.bonus.check(state_data[0])  # Single byte order doesn't matter
         updated_energy = int.from_bytes(state_data[4:6], byteorder="little")
 
         collected_locations: list[int] = []
@@ -157,8 +158,8 @@ class MMAAmuletState:
         self.flags: MMAFlagField = MMAFlagField(4, offset)
 
     # TODO: this should return location ids
-    def update(self, data: int) -> list[int]:
-        return self.flags.update(data)
+    def check_locations(self, data: int) -> list[int]:
+        return self.flags.check(data)
 
 
 class MMAPlayerState(MMAAddressTableConsumer):
@@ -170,7 +171,8 @@ class MMAPlayerState(MMAAddressTableConsumer):
         # Limit the maximum health and lives to this number
         self.max_limit: int = 100
 
-    async def update(self, ctx: "BizHawkClientContext") -> None:
+    async def write_flags(self, ctx: "BizHawkClientContext") -> None:
+        # TODO: make list instead
         if not self.spin and not self.glove:
             # Both of these need to be frozen.
             # The glove's value doesn't really matter.
@@ -179,13 +181,26 @@ class MMAPlayerState(MMAAddressTableConsumer):
                 [
                     (self.address_table.power_glove, [0], "MainRAM"),
                     (self.address_table.spin_attack, [0], "MainRAM"),
+                    (self.address_table.morphs, self.morphs.get_bytes(), "MainRAM"),
                 ],
             )
         elif not self.spin:
-            await bizhawk.write(ctx.bizhawk_ctx, [(self.address_table.spin_attack, [0], "MainRAM")])
+            await bizhawk.write(
+                ctx.bizhawk_ctx,
+                [
+                    (self.address_table.spin_attack, [0], "MainRAM"),
+                    (self.address_table.morphs, self.morphs.get_bytes(), "MainRAM"),
+                ],
+            )
         else:
             # No glove, but yes spin
-            await bizhawk.write(ctx.bizhawk_ctx, [(self.address_table.power_glove, [0], "MainRAM")])
+            await bizhawk.write(
+                ctx.bizhawk_ctx,
+                [
+                    (self.address_table.power_glove, [0], "MainRAM"),
+                    (self.address_table.morphs, self.morphs.get_bytes(), "MainRAM"),
+                ],
+            )
             # Spin only needs to be written to if it's zero
             _ = await bizhawk.guarded_write(
                 ctx.bizhawk_ctx,
@@ -250,7 +265,7 @@ class MMAGameState(MMAAddressTableConsumer):
             region.identifier: MMALevelState(
                 self.address_table,
                 region,
-                address_table.level_state + (i * MMALevelState.level_state_size),
+                address_table.level_state + (i * MMALevelState.level_state_total_size),
                 energy_thresholds,
             )
             for i, region in enumerate(non_boss_region_lookup.values())
@@ -289,10 +304,7 @@ class MMAGameState(MMAAddressTableConsumer):
                 ],
             )
         else:
-            # Write morph powers
-            await bizhawk.write(
-                ctx.bizhawk_ctx, [(self.address_table.morphs, self.player.morphs.get_bytes(), "MainRAM")]
-            )
+            await self.player.write_flags(ctx)
         return True
 
     async def receive_items(self, ctx: "BizHawkClientContext") -> None:
@@ -315,8 +327,11 @@ class MMAGameState(MMAAddressTableConsumer):
                             self.player.morphs.swim = True
                         case AbilityFlag.SMASH:
                             self.player.morphs.smash = True
+                        case AbilityFlag.SPIN:
+                            self.player.spin = True
+                        case AbilityFlag.GLOVE:
+                            self.player.glove = True
                         case _:
-                            # TODO: glove & spin
                             pass
                 case MMALevelItemData():
                     self.level_unlocks[item.index] = True
@@ -365,7 +380,7 @@ class MMAGameState(MMAAddressTableConsumer):
             # Extract amulet pickup changes
             amulet_collections: list[int] = []
             for amulet_type, state in self.amulets.items():
-                changes = state.update(flags_int)
+                changes = state.check_locations(flags_int)
                 # TODO: emit location collection
                 if len(changes) > 0:
                     logger.info(f"'{amulet_type}' changes - {changes}")
@@ -379,7 +394,7 @@ class MMAGameState(MMAAddressTableConsumer):
                 _ = await ctx.check_locations(amulet_collections)
 
         if (level := self.level_states.get(self.active_level_name)) is not None:
-            level_changes = await level.update(ctx)
+            level_changes = await level.check_locations(ctx)
             if len(level_changes) > 0:
                 _ = await ctx.check_locations(level_changes)
             pass
@@ -437,7 +452,6 @@ class MMAClient(BizHawkClient):
         self.last_received_index: int = 0
         self.goaled: bool = False
         self.was_save_loaded: bool = False
-        self.active_level_name: str = ""
         self.address_table: AddressTable
 
     def init_state(self, level_name: str | None = None) -> None:
@@ -500,14 +514,14 @@ class MMAClient(BizHawkClient):
         if level_name != self.state.active_level_name:
             # TODO: emit events for trackers and stuff
             self.state.active_level_name = level_name
-            logger.info(f"Level changed to '{self.active_level_name}'")
+            logger.info(f"Level changed to '{self.state.active_level_name}'")
 
         # TODO: probably others
         if (
-            self.active_level_name == ""
-            or self.active_level_name == "FRONT1"
-            or self.active_level_name == "GLOBAL"
-            or self.active_level_name.startswith("DEMO")
+            self.state.active_level_name == ""
+            or self.state.active_level_name == "FRONT1"
+            or self.state.active_level_name == "GLOBAL"
+            or self.state.active_level_name.startswith("DEMO")
         ):
             # Not in-game.
             if self.was_save_loaded:
