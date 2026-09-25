@@ -339,6 +339,15 @@ class MMAGameState(MMAAddressTableConsumer):
                 # TODO: do we want to do anything with this information?
                 _ = await ctx.check_locations(amulet_collections)
 
+        # TODO: Token data should checked via the `level_last_pickup`:
+        # - Pull the `level_last_pickup` value, and compare to last frame
+        # - If changed, compare against current level's token addresses (and have not already been collected)
+        # - Emit changes
+        # We can also validate all of this data on connect, since the game stores all permanent pickups
+        # just after the level's general data.
+        # If the player is in a level however, we would also need to check the current level's active state
+        # by directly reading each token's state, since the level state is not updated until leaving.
+
         if (level := self.level_states.get(self.active_level_name)) is not None:
             level_state_collections: list[int] = []
             region_lookup = location_type_lookup_by_region[level.name]

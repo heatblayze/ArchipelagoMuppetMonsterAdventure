@@ -4,6 +4,11 @@ from worlds.muppet_monster_adventure.shared import LevelName
 
 
 class TokenAddresses(NamedTuple):
+    """The collection of addresses for each level's tokens.
+    Note that these should be the addresses of the ACTUAL data, NOT the address
+    which stores the POINTER to the data.
+    These values are used at runtime to compare against the `level_last_pickup` value."""
+
     token_1: int
     token_2: int
     token_3: int
