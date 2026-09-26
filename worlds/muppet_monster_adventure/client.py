@@ -2,7 +2,7 @@ from math import floor
 from typing import TYPE_CHECKING, ClassVar
 
 from .addresses.ntsc import ntsc_addresses
-from .addresses.structs import AddressTable, PickupAddresses
+from .addresses.structs import AddressTable, LevelPickupTable
 
 if TYPE_CHECKING:
     from worlds._bizhawk.context import BizHawkClientContext
@@ -87,7 +87,7 @@ class MMALevelState(MMAAddressTableConsumer):
         self.location_lookup: dict[LocationType, list[MMALocationData]] = location_type_lookup_by_region[
             self.region.name
         ]
-        self.pickup_addresses: PickupAddresses = self.address_table.level_pickup_data[LevelName(self.region.name)]
+        self.pickup_table: LevelPickupTable = self.address_table.level_pickup_data[LevelName(self.region.name)]
 
         # State
         self.bonus: MMAFlagField = MMAFlagField(size=5, offset=0)
@@ -145,8 +145,8 @@ class MMALevelState(MMAAddressTableConsumer):
         if last_pickup != self.last_pickup_addr:
             self.last_pickup_addr = last_pickup
             token_location_lookup = self.location_lookup[LocationType.TOKEN]
-            for i, token_addr in enumerate(self.pickup_addresses.tokens):
-                if self.last_pickup_addr == token_addr:
+            for i, token_info in enumerate(self.pickup_table.tokens):
+                if self.last_pickup_addr == token_info.active:
                     self.collected_tokens[i]
                     collected_locations.append(token_location_lookup[i].ap_id())
                     break

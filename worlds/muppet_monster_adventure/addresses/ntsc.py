@@ -1,10 +1,12 @@
 from ..shared import LevelName
-from .structs import AddressTable, PickupAddresses
+from .structs import AddressTable, LevelPickupTable, PickupAddress
 
 ntsc_addresses = AddressTable(
     game_identifier=0x009274,
     loading_state=0x00EAB9,
     active_level_name=0x0B87F8,
+    save_data=0x0,
+    active_save_index=0x0CCAE8,
     bosses_beaten=0x0B8904,
     level_unlock_states=0x0AA0C4,
     zone_unlocked_count=0x0E22F0,
@@ -20,31 +22,31 @@ ntsc_addresses = AddressTable(
     level_state=0x0CCB86,
     last_pickup=0x0B8698,
     level_pickup_data={
-        LevelName.PEACOCK_PURGATORY: PickupAddresses(
+        LevelName.PEACOCK_PURGATORY: LevelPickupTable(
             tokens=[
-                0x01F2964,
-                0x01F2938,
-                0x01F4678,
-                0x01F66C0,
-                0x01EF998,
+                PickupAddress(active=0x01F2964, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F2938, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F4678, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F66C0, save=0x0, save_offset=0),
+                PickupAddress(active=0x01EF998, save=0x0, save_offset=0),
             ]
         ),
-        LevelName.HALLWAYS_OF_DOOM: PickupAddresses(
+        LevelName.HALLWAYS_OF_DOOM: LevelPickupTable(
             tokens=[
-                0x01F53F4,
-                0x01F2548,
-                0x01F52D0,
-                0x01F2574,
-                0x01EEEC8,
+                PickupAddress(active=0x01F53F4, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F2548, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F52D0, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F2574, save=0x0, save_offset=0),
+                PickupAddress(active=0x01EEEC8, save=0x0, save_offset=0),
             ]
         ),
-        LevelName.POKER_FACES: PickupAddresses(
+        LevelName.POKER_FACES: LevelPickupTable(
             tokens=[
-                0x01F87BC,
-                0x01F69B8,
-                0x01F86A8,
-                0x01F69E4,
-                0x01F3724,
+                PickupAddress(active=0x01F87BC, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F69B8, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F86A8, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F69E4, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F3724, save=0x0, save_offset=0),
             ]
         ),
     },

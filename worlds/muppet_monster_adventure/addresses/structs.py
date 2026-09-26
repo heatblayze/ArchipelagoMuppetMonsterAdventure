@@ -3,13 +3,22 @@ from typing import NamedTuple
 from ..shared import LevelName
 
 
-class PickupAddresses(NamedTuple):
+class PickupAddress(NamedTuple):
+    active: int
+    """The address of the pickup data when the level is currently active."""
+    save: int
+    """The address of the pickup data flag, in save data"""
+    save_offset: int
+    """Pickups are stored in save data as 2 bits. This is the offset from the start of the byte listed in `save`."""
+
+
+class LevelPickupTable(NamedTuple):
     """The collection of addresses for each level's pickups.
     Note that these should be the addresses of the ACTUAL data, NOT the address
     which stores the POINTER to the data.
     These values are used at runtime to compare against the `level_last_pickup` value."""
 
-    tokens: list[int]
+    tokens: list[PickupAddress]
 
 
 class AddressTable(NamedTuple):
@@ -25,6 +34,12 @@ class AddressTable(NamedTuple):
 
     active_level_name: int
     """Stores a short, ASCII identifier for the current level"""
+
+    save_data: int
+    """Current save's data in MainRAM"""
+
+    active_save_index: int
+    """Zero-based value of the active save number."""
 
     bosses_beaten: int
     """The index (1-based) of the **greatest** boss killed (clockwise)"""
@@ -62,11 +77,5 @@ class AddressTable(NamedTuple):
     last_pickup: int
     """Stores the memory address of the last pickup"""
 
-    level_pickup_data: dict[LevelName, PickupAddresses]
+    level_pickup_data: dict[LevelName, LevelPickupTable]
     """Lists the memory addresses of pickups, for each level"""
-
-    save_data: int
-    """Current save's data in MainRAM"""
-
-    active_save_index: int
-    """Zero-based value of the active save number."""
