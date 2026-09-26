@@ -539,8 +539,8 @@ class MMAGameState(MMAAddressTableConsumer):
         self.level_unlocks = [((unlocks_int >> idx) & 1) == 1 for idx, _ in enumerate(self.level_unlocks)]
 
     async def save(self, ctx: "BizHawkClientContext") -> None:
-        # TODO: does this need to wait for a save to become active?
-        # if so, maybe this should store in both MainRAM and also Memcard?
+        # TODO: if we really need to (in the event that this overlaps with used data)
+        # we can replace this with just the received index and skip over filler items when receiving initially.
         level_unlocks: int = 0
         for idx, unlocked in enumerate(self.level_unlocks):
             level_unlocks |= unlocked << idx
