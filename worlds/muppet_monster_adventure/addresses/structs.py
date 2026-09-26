@@ -64,3 +64,9 @@ class AddressTable(NamedTuple):
 
     level_pickup_data: dict[LevelName, PickupAddresses]
     """Lists the memory addresses of pickups, for each level"""
+
+    save_data: int
+    """Current save's data in MainRAM"""
+
+    active_save_index: int
+    """Zero-based value of the active save number."""

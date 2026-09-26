@@ -46,7 +46,7 @@ class MMARegion:
         locations: list[MMALocationData],
     ) -> None:
         self.name: str = name.value
-        self.identifier: str = identifier
+        self.game_identifier: str = identifier
         self.energy_count: int = energy_count
         self.locations: list[MMALocationData] = locations
         pass

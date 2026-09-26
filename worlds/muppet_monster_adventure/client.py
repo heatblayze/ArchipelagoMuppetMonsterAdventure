@@ -67,6 +67,7 @@ class MMAMorphState:
 
 
 class MMALevelState(MMAAddressTableConsumer):
+    level_save_state_size: int = 0  # TODO: UNK
     level_state_total_size: int = 104
     level_state_relevant_size: int = 6
     last_pickup_size: int = 3
@@ -101,6 +102,9 @@ class MMALevelState(MMAAddressTableConsumer):
                 LevelName(self.region.name),
                 f"Client expects {len(self.energy_thresholds)} but the level has {len(self.location_lookup[LocationType.ENERGY])}",
             )
+
+    def print(self) -> str:
+        return f"Tokens: {self.collected_tokens}, Energy: {self.energy}, Bonus: {self.bonus.flags}"
 
     # TODO: Need a method to validate all of this data on connect,
     # since the game stores all permanent pickups just after the level's general data.
@@ -148,8 +152,10 @@ class MMALevelState(MMAAddressTableConsumer):
                     break
         return collected_locations
 
-    def print(self) -> str:
-        return f"Tokens: {self.collected_tokens}, Energy: {self.energy}, Bonus: {self.bonus.flags}"
+    async def initialize(self, ctx: "BizHawkClientContext", save_data_address: int, active: bool) -> list[int]:
+        """Returns any checked locations from save data.
+        If the level is currently active it instead checks the active memory."""
+        return []
 
 
 class MMAAmuletState:
@@ -262,7 +268,7 @@ class MMAGameState(MMAAddressTableConsumer):
         self.player: MMAPlayerState = MMAPlayerState(address_table)
         self.bosses_beaten: list[bool] = [False] * 5
         self.level_states: dict[str, MMALevelState] = {
-            region.identifier: MMALevelState(
+            region.game_identifier: MMALevelState(
                 self.address_table,
                 region,
                 address_table.level_state + (i * MMALevelState.level_state_total_size),
@@ -429,6 +435,22 @@ class MMAGameState(MMAAddressTableConsumer):
             pass
         return
 
+    async def initialize(self, ctx: "BizHawkClientContext") -> None:
+        """Sets up the initial state from the current game state.
+        Loads the current state from save data and sends out any checked locations."""
+        await self.check_locations(ctx)
+        level_changes: list[int] = []
+        for idx, (name, level) in enumerate(self.level_states.items()):
+            level_changes.extend(
+                await level.initialize(
+                    ctx,
+                    self.address_table.save_data + (idx * MMALevelState.level_save_state_size),
+                    self.active_level_name == name,
+                )
+            )
+        if len(level_changes) > 0:
+            _ = await ctx.check_locations(level_changes)
+
 
 class MMAClient(BizHawkClient):
     game = game_name
@@ -442,7 +464,7 @@ class MMAClient(BizHawkClient):
 
     version_addresses: ClassVar[dict[str, AddressTable]] = {
         "SLUS_012.38": ntsc_addresses,
-        # "SCES_024.03": pal_aunz_addresses,
+        # "SCES_024.03": pal_addresses,
     }
 
     def __init__(self):
