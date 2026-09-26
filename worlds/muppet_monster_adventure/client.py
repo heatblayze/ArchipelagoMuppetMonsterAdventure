@@ -70,7 +70,7 @@ class MMALevelState(MMAAddressTableConsumer):
     level_state_total_size: int = 104
     level_state_relevant_size: int = 6
     last_pickup_size: int = 3
-    token_active_offset: int = 2  # Num bytes after address where active flag is stored
+    token_active_offset: int = 3  # Num bytes after address where active flag is stored
 
     def __init__(
         self,
@@ -221,8 +221,7 @@ class MMAPlayerState(MMAAddressTableConsumer):
                     (self.address_table.morphs, self.morphs.get_bytes(), "MainRAM"),
                 ],
             )
-        else:
-            # No glove, but yes spin
+        elif not self.glove:
             await bizhawk.write(
                 ctx.bizhawk_ctx,
                 [
@@ -236,6 +235,8 @@ class MMAPlayerState(MMAAddressTableConsumer):
                 [(self.address_table.spin_attack, [1], "MainRAM")],
                 [(self.address_table.spin_attack, [0], "MainRAM")],
             )
+        else:
+            await bizhawk.write(ctx.bizhawk_ctx, [(self.address_table.morphs, self.morphs.get_bytes(), "MainRAM")])
 
     async def change_current_health(self, increase: bool, ctx: "BizHawkClientContext"):
         # Grab the current health and the max health
