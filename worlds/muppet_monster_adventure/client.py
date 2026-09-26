@@ -153,6 +153,8 @@ class MMALevelState(MMAAddressTableConsumer):
         return collected_locations
 
     async def initialize(self, ctx: "BizHawkClientContext", active: bool) -> list[int]:
+        from CommonClient import logger
+
         """Returns any checked locations from save data.
         If the level is currently active it instead checks the active memory."""
         # We only need to check pickups - all other data is checked via check_locations
@@ -164,15 +166,19 @@ class MMALevelState(MMAAddressTableConsumer):
         ]
         addresses = await bizhawk.read(ctx.bizhawk_ctx, token_addresses)
         for i, token in enumerate(self.pickup_table.tokens):
+            if (active and token.active == 0) or (not active and token.save == 0):
+                continue
             if active:
                 if addresses[i][0] == 0:
                     self.collected_tokens[i]
                     collected_locations.append(token_location_lookup[i].ap_id())
+                    logger.info(f"Collected token from active level {token_location_lookup[i].full_identifier}")
             else:
-                if addresses[i][token.save_offset] == 1:
+                if (addresses[i][0] >> token.save_offset) & 1 == 1:
                     self.collected_tokens[i]
                     collected_locations.append(token_location_lookup[i].ap_id())
-        return []
+                    logger.info(f"Collected token from save state {token_location_lookup[i].full_identifier}")
+        return collected_locations
 
 
 class MMAAmuletState:
@@ -568,11 +574,11 @@ class MMAClient(BizHawkClient):
                 self.init_state(self.state.active_level_name)
             self.was_save_loaded = False
             return
-        self.was_save_loaded = True
 
-        # TODO: HERE is where we should init state, once a save is loaded.
-        # We should store metadata in the save if possible so we can validate it first
-        # and avoid re-receiving filler items.
+        if not self.was_save_loaded:
+            # TODO: read last received index from save data
+            await self.state.initialize(ctx)
+        self.was_save_loaded = True
 
         if not await self.state.try_write_flags(ctx):
             # Game is loaded correctly, but is not in a state to write anything.
