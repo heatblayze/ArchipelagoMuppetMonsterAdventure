@@ -4,12 +4,14 @@ from ..shared import LevelName
 
 
 class PickupAddress(NamedTuple):
+    """Individual pickup data is only updated whenever the game is saved, or when the player returns to the Hub."""
+
     active: int
     """The address of the pickup data when the level is currently active."""
     save: int
     """The address of the pickup data flag, in save data"""
     save_offset: int
-    """Pickups are stored in save data as 2 bits. This is the offset from the start of the byte listed in `save`."""
+    """Pickups are stored in save data as 1-2 bits. This is the offset from the start of the byte listed in `save`."""
 
 
 class LevelPickupTable(NamedTuple):

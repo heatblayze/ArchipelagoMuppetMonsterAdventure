@@ -24,11 +24,11 @@ ntsc_addresses = AddressTable(
     level_pickup_data={
         LevelName.PEACOCK_PURGATORY: LevelPickupTable(
             tokens=[
-                PickupAddress(active=0x01F2964, save=0x0, save_offset=0),
-                PickupAddress(active=0x01F2938, save=0x0, save_offset=0),
-                PickupAddress(active=0x01F4678, save=0x0, save_offset=0),
-                PickupAddress(active=0x01F66C0, save=0x0, save_offset=0),
-                PickupAddress(active=0x01EF998, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F2964, save=0x0CCBB9, save_offset=2),  # Near exit
+                PickupAddress(active=0x01F2938, save=0x0CCBB9, save_offset=0),  # Super jump pad
+                PickupAddress(active=0x01F4678, save=0x0CCBC3, save_offset=4),  # Percy
+                PickupAddress(active=0x01F66C0, save=0x0CCBD0, save_offset=4),  # Sunflower game
+                PickupAddress(active=0x01EF998, save=0x0CCB8F, save_offset=4),  # Bonus
             ]
         ),
         LevelName.HALLWAYS_OF_DOOM: LevelPickupTable(

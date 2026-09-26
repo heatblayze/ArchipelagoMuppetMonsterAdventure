@@ -67,10 +67,10 @@ class MMAMorphState:
 
 
 class MMALevelState(MMAAddressTableConsumer):
-    level_save_state_size: int = 0  # TODO: UNK
     level_state_total_size: int = 104
     level_state_relevant_size: int = 6
     last_pickup_size: int = 3
+    token_active_offset: int = 2  # Num bytes after address where active flag is stored
 
     def __init__(
         self,
@@ -152,9 +152,26 @@ class MMALevelState(MMAAddressTableConsumer):
                     break
         return collected_locations
 
-    async def initialize(self, ctx: "BizHawkClientContext", save_data_address: int, active: bool) -> list[int]:
+    async def initialize(self, ctx: "BizHawkClientContext", active: bool) -> list[int]:
         """Returns any checked locations from save data.
         If the level is currently active it instead checks the active memory."""
+        # We only need to check pickups - all other data is checked via check_locations
+        collected_locations: list[int] = []
+        token_location_lookup = self.location_lookup[LocationType.TOKEN]
+        token_addresses: list[tuple[int, int, str]] = [
+            (token.active + self.token_active_offset, 1, "MainRAM") if active else (token.save, 1, "MainRAM")
+            for token in self.pickup_table.tokens
+        ]
+        addresses = await bizhawk.read(ctx.bizhawk_ctx, token_addresses)
+        for i, token in enumerate(self.pickup_table.tokens):
+            if active:
+                if addresses[i][0] == 0:
+                    self.collected_tokens[i]
+                    collected_locations.append(token_location_lookup[i].ap_id())
+            else:
+                if addresses[i][token.save_offset] == 1:
+                    self.collected_tokens[i]
+                    collected_locations.append(token_location_lookup[i].ap_id())
         return []
 
 
@@ -440,11 +457,10 @@ class MMAGameState(MMAAddressTableConsumer):
         Loads the current state from save data and sends out any checked locations."""
         await self.check_locations(ctx)
         level_changes: list[int] = []
-        for idx, (name, level) in enumerate(self.level_states.items()):
+        for name, level in self.level_states.items():
             level_changes.extend(
                 await level.initialize(
                     ctx,
-                    self.address_table.save_data + (idx * MMALevelState.level_save_state_size),
                     self.active_level_name == name,
                 )
             )
