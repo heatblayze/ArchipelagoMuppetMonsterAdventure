@@ -1,5 +1,5 @@
-from math import floor
-from typing import TYPE_CHECKING, ClassVar
+from math import ceil, floor
+from typing import TYPE_CHECKING, ClassVar, Sequence
 
 from .addresses.ntsc import ntsc_addresses
 from .addresses.structs import AddressTable, LevelPickupTable
@@ -54,6 +54,8 @@ class MMAFlagField:
 
 
 class MMAMorphState:
+    packed_size: int = 5
+
     def __init__(self) -> None:
         self.glide: bool = False
         self.climb: bool = False
@@ -61,9 +63,18 @@ class MMAMorphState:
         self.swim: bool = False
         self.smash: bool = False
 
+    def unpack(self, packed_data: int) -> None:
+        self.glide = ((packed_data >> 0) & 1) == 1
+        self.climb = ((packed_data >> 1) & 1) == 1
+        self.push = ((packed_data >> 2) & 1) == 1
+        self.swim = ((packed_data >> 3) & 1) == 1
+        self.smash = ((packed_data >> 4) & 1) == 1
+
+    def pack(self) -> int:
+        return (self.glide << 0) | (self.climb << 1) | (self.push << 2) | (self.swim << 3) | (self.smash << 4)
+
     def get_bytes(self) -> bytes:
-        packed_data = (self.glide << 0) | (self.climb << 1) | (self.push << 2) | (self.swim << 3) | (self.smash << 4)
-        return packed_data.to_bytes(2, "little")
+        return self.pack().to_bytes(2, "little")
 
 
 class MMALevelState(MMAAddressTableConsumer):
@@ -114,7 +125,7 @@ class MMALevelState(MMAAddressTableConsumer):
     # since the game stores all permanent pickups just after the level's general data.
     # It should include a param indicating whether this is the active level, since persisted level
     # data is only updated when the player returns to the Hub.
-    async def check_locations(self, ctx: "BizHawkClientContext") -> list[int]:
+    async def get_checked_locations(self, ctx: "BizHawkClientContext") -> list[int]:
         # TODO: technically we could do visit-sanity if we wanted, since the game tracks it.
         # Would need to adjust all of this though, since it's 2 bytes prior to the Bonus.
         data = await bizhawk.read(
@@ -180,7 +191,7 @@ class MMALevelState(MMAAddressTableConsumer):
                     collected_locations.append(token_location_lookup[i].ap_id())
                     logger.info(f"Collected token from active level {token_location_lookup[i].full_identifier}")
             else:
-                if (addresses[i][0] >> token.save_offset) & 1 == 1:
+                if ((addresses[i][0] >> token.save_offset) & 1) == 1:
                     self.collected_tokens[i]
                     collected_locations.append(token_location_lookup[i].ap_id())
                     logger.info(f"Collected token from save state {token_location_lookup[i].full_identifier}")
@@ -193,18 +204,30 @@ class MMAAmuletState:
         self.flags: MMAFlagField = MMAFlagField(4, offset)
 
     # TODO: this should return location ids
-    def check_locations(self, data: int) -> list[int]:
+    def get_checked_locations(self, data: int) -> list[int]:
         return self.flags.check(data)
 
 
 class MMAPlayerState(MMAAddressTableConsumer):
+    # Limit the maximum health and lives to this number
+    max_limit: int = 100
+
+    packed_size: int = MMAMorphState.packed_size + 2
+
     def __init__(self, address_table: AddressTable) -> None:
         super().__init__(address_table)
         self.morphs: MMAMorphState = MMAMorphState()
         self.glove: bool = False
         self.spin: bool = False
-        # Limit the maximum health and lives to this number
-        self.max_limit: int = 100
+
+    def unpack(self, packed_data: int) -> None:
+        self.morphs.unpack(packed_data)
+        self.glove = ((packed_data >> MMAMorphState.packed_size) & 1) == 1
+        self.spin = ((packed_data >> MMAMorphState.packed_size + 1) & 1) == 1
+
+    def pack(self) -> int:
+        morphs = self.morphs.pack()
+        return morphs | (self.glove << MMAMorphState.packed_size) | (self.spin << MMAMorphState.packed_size + 1)
 
     async def write_flags(self, ctx: "BizHawkClientContext") -> None:
         # TODO: make list instead
@@ -286,6 +309,13 @@ class MMAPlayerState(MMAAddressTableConsumer):
 
 
 class MMAGameState(MMAAddressTableConsumer):
+    saved_custom_marker_size: int = 1
+    saved_received_index_size: int = 2
+    saved_abilities_and_goal_size: int = 2
+    saved_level_unlocks_size: int = ceil(len(region_lookup) / 8.0)
+
+    custom_marker_value: int = 67
+
     def __init__(
         self,
         address_table: AddressTable,
@@ -404,7 +434,7 @@ class MMAGameState(MMAAddressTableConsumer):
 
         self.last_received_index = len(ctx.items_received)
 
-    async def check_locations(self, ctx: "BizHawkClientContext") -> None:
+    async def get_checked_locations(self, ctx: "BizHawkClientContext") -> None:
         from CommonClient import logger
 
         # TODO: move amulets into separate class
@@ -416,7 +446,7 @@ class MMAGameState(MMAAddressTableConsumer):
             # Extract amulet pickup changes
             amulet_collections: list[int] = []
             for amulet_type, state in self.amulets.items():
-                changes = state.check_locations(flags_int)
+                changes = state.get_checked_locations(flags_int)
                 # TODO: emit location collection
                 if len(changes) > 0:
                     logger.info(f"'{amulet_type}' changes - {changes}")
@@ -430,7 +460,7 @@ class MMAGameState(MMAAddressTableConsumer):
                 _ = await ctx.check_locations(amulet_collections)
 
         if (level := self.level_states.get(self.active_level_name)) is not None:
-            level_changes = await level.check_locations(ctx)
+            level_changes = await level.get_checked_locations(ctx)
             if len(level_changes) > 0:
                 _ = await ctx.check_locations(level_changes)
             pass
@@ -468,7 +498,7 @@ class MMAGameState(MMAAddressTableConsumer):
     async def initialize(self, ctx: "BizHawkClientContext") -> None:
         """Sets up the initial state from the current game state.
         Loads the current state from save data and sends out any checked locations."""
-        await self.check_locations(ctx)
+        await self.get_checked_locations(ctx)
         level_changes: list[int] = []
         for name, level in self.level_states.items():
             level_changes.extend(
@@ -479,6 +509,60 @@ class MMAGameState(MMAAddressTableConsumer):
             )
         if len(level_changes) > 0:
             _ = await ctx.check_locations(level_changes)
+
+        sizes: list[int] = [
+            self.saved_custom_marker_size,
+            self.saved_received_index_size,
+            self.saved_abilities_and_goal_size,
+            self.saved_level_unlocks_size,
+        ]
+        lookups: list[tuple[int, int, str]] = []
+        total_size: int = 0
+        for size in sizes:
+            lookups.append((self.address_table.custom_save_data + total_size, size, "MainRAM"))
+            total_size += size
+        custom_data = await bizhawk.read(ctx.bizhawk_ctx, lookups)
+
+        def get_int(index: int) -> int:
+            return int.from_bytes(custom_data[index], byteorder="little")
+
+        custom_marker = get_int(0)
+        if custom_marker != self.custom_marker_value:
+            # Not archipelago save (yet). Initial save information may be incorrect.
+            return
+        self.last_received_index = get_int(1)
+        player_data = get_int(2)
+        self.player.unpack(player_data)
+        self.goaled = ((player_data >> MMAPlayerState.packed_size) & 1) == 1
+
+        unlocks_int = get_int(2)
+        self.level_unlocks = [((unlocks_int >> idx) & 1) == 1 for idx, _ in enumerate(self.level_unlocks)]
+
+    async def save(self, ctx: "BizHawkClientContext") -> None:
+        # TODO: does this need to wait for a save to become active?
+        # if so, maybe this should store in both MainRAM and also Memcard?
+        level_unlocks: int = 0
+        for idx, unlocked in enumerate(self.level_unlocks):
+            level_unlocks |= unlocked << idx
+
+        values: dict[int, int] = {
+            self.saved_custom_marker_size: self.custom_marker_value,
+            self.saved_received_index_size: self.last_received_index,
+            self.saved_abilities_and_goal_size: self.player.pack() | (self.goaled << MMAPlayerState.packed_size),
+            self.saved_level_unlocks_size: level_unlocks,
+        }
+        lookups: list[tuple[int, Sequence[int], str]] = []
+        total_size: int = 0
+        for size, value in values.items():
+            lookups.append(
+                (
+                    self.address_table.custom_save_data + total_size,
+                    value.to_bytes(size, "little"),
+                    "MainRAM",
+                )
+            )
+            total_size += size
+        await bizhawk.write(ctx.bizhawk_ctx, lookups)
 
 
 class MMAClient(BizHawkClient):
@@ -505,7 +589,7 @@ class MMAClient(BizHawkClient):
         self.was_save_loaded: bool = False
         self.address_table: AddressTable
 
-    def init_state(self, level_name: str | None = None) -> None:
+    def reset_state(self, level_name: str | None = None) -> None:
         # TODO: options
         self.state = MMAGameState(self.address_table, 1, [0.5, 1.0])
         if level_name is not None:
@@ -558,7 +642,7 @@ class MMAClient(BizHawkClient):
         # TODO: we probably want to keep state as `None` until the player is connected, and reset when disconnected.
         if ctx.server is None or ctx.server.socket.closed or ctx.slot_data is None or ctx.auth is None:
             # Just reset state whenever we disconnect.
-            self.init_state()
+            self.reset_state()
             return
 
         level_name = await self.get_level_name(ctx)
@@ -578,7 +662,7 @@ class MMAClient(BizHawkClient):
             if self.was_save_loaded:
                 # Player returned to menu. Reset state.
                 # Copy the old level name to prevent re-firing any listeners on the level change.
-                self.init_state(self.state.active_level_name)
+                self.reset_state(self.state.active_level_name)
             self.was_save_loaded = False
             return
 
@@ -592,8 +676,10 @@ class MMAClient(BizHawkClient):
             return
 
         # Locations may have triggered own items, so check those first.
-        await self.state.check_locations(ctx)
+        await self.state.get_checked_locations(ctx)
         await self.state.receive_items(ctx)
+        # Persist the state in save memory
+        await self.state.save(ctx)
         return
 
     async def get_level_name(self, ctx: "BizHawkClientContext") -> str:

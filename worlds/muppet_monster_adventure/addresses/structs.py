@@ -37,11 +37,11 @@ class AddressTable(NamedTuple):
     active_level_name: int
     """Stores a short, ASCII identifier for the current level"""
 
-    save_data: int
-    """Current save's data in MainRAM"""
+    custom_save_data: int
+    """Current save's custom storage data in MainRAM"""
 
     active_save_index: int
-    """Zero-based value of the active save number."""
+    """Zero-based value of the active save number"""
 
     bosses_beaten: int
     """The index (1-based) of the **greatest** boss killed (clockwise)"""
