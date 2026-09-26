@@ -33,11 +33,11 @@ ntsc_addresses = AddressTable(
         ),
         LevelName.HALLWAYS_OF_DOOM: LevelPickupTable(
             tokens=[
-                PickupAddress(active=0x01F53F4, save=0x0, save_offset=0),
-                PickupAddress(active=0x01F2548, save=0x0, save_offset=0),
-                PickupAddress(active=0x01F52D0, save=0x0, save_offset=0),
-                PickupAddress(active=0x01F2574, save=0x0, save_offset=0),
-                PickupAddress(active=0x01EEEC8, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F53F4, save=0x0CCC39, save_offset=0),  # Rizzo
+                PickupAddress(active=0x01F2548, save=0x0CCC26, save_offset=0),  # Bookshelves
+                PickupAddress(active=0x01F52D0, save=0x0CCC38, save_offset=4),  # Smashing
+                PickupAddress(active=0x01F2574, save=0x0CCC26, save_offset=2),  # Near end
+                PickupAddress(active=0x01EEEC8, save=0x0CCBF5, save_offset=4),  # BONUS
             ]
         ),
         LevelName.POKER_FACES: LevelPickupTable(

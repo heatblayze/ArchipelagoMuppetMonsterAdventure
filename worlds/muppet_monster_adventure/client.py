@@ -72,6 +72,10 @@ class MMALevelState(MMAAddressTableConsumer):
     last_pickup_size: int = 3
     token_active_offset: int = 3  # Num bytes after address where active flag is stored
 
+    bonus_offset: int = 0
+    energy_offset: int = 2
+    energy_size: int = 2
+
     def __init__(
         self,
         address_table: AddressTable,
@@ -113,18 +117,20 @@ class MMALevelState(MMAAddressTableConsumer):
     async def check_locations(self, ctx: "BizHawkClientContext") -> list[int]:
         # TODO: technically we could do visit-sanity if we wanted, since the game tracks it.
         # Would need to adjust all of this though, since it's 2 bytes prior to the Bonus.
-        all_bytes = await bizhawk.read(
+        data = await bizhawk.read(
             ctx.bizhawk_ctx,
             [
                 (self.state_address, self.level_state_relevant_size, "MainRAM"),
                 (self.address_table.last_pickup, self.last_pickup_size, "MainRAM"),
             ],
         )
-        state_data = all_bytes[0]
-        last_pickup = int.from_bytes(all_bytes[1], byteorder="little")
+        state_data = data[0]
+        last_pickup = int.from_bytes(data[1], byteorder="little")
 
-        bonus_changes = self.bonus.check(state_data[0])  # Single byte order doesn't matter
-        updated_energy = int.from_bytes(state_data[4:6], byteorder="little")
+        bonus_changes = self.bonus.check(state_data[self.bonus_offset])  # Single byte order doesn't matter
+        updated_energy = int.from_bytes(
+            state_data[self.energy_offset : self.energy_offset + self.energy_size], byteorder="little"
+        )
 
         collected_locations: list[int] = []
         if len(bonus_changes) > 0:
