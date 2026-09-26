@@ -42,11 +42,11 @@ ntsc_addresses = AddressTable(
         ),
         LevelName.POKER_FACES: LevelPickupTable(
             tokens=[
-                PickupAddress(active=0x01F87BC, save=0x0, save_offset=0),
-                PickupAddress(active=0x01F69B8, save=0x0, save_offset=0),
-                PickupAddress(active=0x01F86A8, save=0x0, save_offset=0),
-                PickupAddress(active=0x01F69E4, save=0x0, save_offset=0),
-                PickupAddress(active=0x01F3724, save=0x0, save_offset=0),
+                PickupAddress(active=0x01F87BC, save=0x0CCC94, save_offset=4),  # Targets
+                PickupAddress(active=0x01F69B8, save=0x0CCC8A, save_offset=6),  # Pillar
+                PickupAddress(active=0x01F86A8, save=0x0CCC94, save_offset=0),  # Blocks
+                PickupAddress(active=0x01F69E4, save=0x0CCC8B, save_offset=0),  # Rooftop
+                PickupAddress(active=0x01F3724, save=0x0CCC5D, save_offset=4),  # BONUS
             ]
         ),
     },
