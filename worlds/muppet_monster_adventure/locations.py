@@ -46,6 +46,9 @@ class MMABossLocationData(MMALocationData):
     ):
         super().__init__(LocationType.BOSS, LocationType.BOSS.value, ability_requirements)
 
+    def get_event_name(self) -> str:
+        return f"{self.full_identifier} event"
+
 
 class EnergyAmount(StrEnum):
     HALF = "50%"

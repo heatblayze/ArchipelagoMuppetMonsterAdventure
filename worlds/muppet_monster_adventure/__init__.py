@@ -1,3 +1,5 @@
+from typing import cast
+
 from BaseClasses import Item, Location, MultiWorld, Region
 from rule_builder import rules
 from worlds.AutoWorld import World
@@ -15,6 +17,7 @@ from .items import (
 )
 from .locations import (
     LocationType,
+    MMABossLocationData,
     all_locations_table,
     location_name_groups,
     location_name_to_id,
@@ -48,7 +51,7 @@ class MuppetMonsterAdventureWorld(World):
         self.starting_level: Item
         self.starter_items: list[Item] = []
         self.location_count: int = 0
-        self.goal_locations: list[tuple[str, str]] = []
+        self.region_events: list[tuple[str, str, rules.Rule | None]] = []
 
     def get_filler_item_name(self) -> str:
         return self.random.choice(filler_items_table).name
@@ -64,8 +67,11 @@ class MuppetMonsterAdventureWorld(World):
 
     def create_regions(self) -> None:
         super().create_regions()
+
+        # Hub always required as it's the starting level.
         hub_region = Region(LevelName.HUB.value, self.player, self.multiworld)
         self.multiworld.regions.append(hub_region)
+
         regions: list[Region] = []
         for region_def in all_locations_table:
             region = Region(region_def.name, self.player, self.multiworld)
@@ -73,8 +79,10 @@ class MuppetMonsterAdventureWorld(World):
             for loc in region_def.locations:
                 self.location_count += 1
                 locations.update({loc.full_identifier: location_name_to_id[loc.full_identifier]})
-                if loc.type == LocationType.BOSS:
-                    self.goal_locations.append((region_def.name, loc.full_identifier + " event"))
+                if type(loc) is MMABossLocationData:
+                    # We need to store these for later since the events rely on regions and locations existing.
+                    # Some future events may also require items existing.
+                    self.region_events.append((region_def.name, loc.get_event_name(), None))
             region.add_locations(locations)
             regions.append(region)
         self.multiworld.regions.extend(regions)
@@ -84,33 +92,33 @@ class MuppetMonsterAdventureWorld(World):
         super().create_items()
 
         pool: list[Item] = []
-        starter_level_index = self.random.randrange(0, len(whitelisted_starting_levels))
-        starter_level_name = whitelisted_starting_levels[starter_level_index]
+        starter_level_name = self.random.choice(whitelisted_starting_levels)
         for item_def in required_items_table:
             item = MMAItem(item_def.name, item_def.classification, item_name_to_id[item_def.name], self.player)
             if type(item_def) is not MMALevelItemData or item_def.name != starter_level_name:
                 if type(item_def) is MMAAbilityItemData and (
                     item_def.ability_type == AbilityFlag.GLOVE or item_def.ability_type == AbilityFlag.SPIN
                 ):
+                    # TODO: Make this an option (and guide everyone to keep it on until we can reliably lock these).
                     self.starter_items.append(item)
                 else:
                     pool.append(item)
             else:
                 self.starting_level = item
 
-        # Boss event flags
-        for region_name, location in self.goal_locations:
+        # Add event flags from regions
+        for region_name, location, rule in self.region_events:
             region = self.get_region(region_name)
-            _ = region.add_event(location)
+            _ = region.add_event(location, rule=rule)
 
+        # TODO: make the weights of these options
         # Add buffer filler items to pool
         diff = self.location_count - len(pool)
 
         trap_count = round(diff / 10)
         if diff > 0:
             for _ in range(diff - trap_count):
-                filler_idx = self.random.randrange(0, len(filler_items_table))
-                item_def = filler_items_table[filler_idx]
+                item_def = self.random.choice(filler_items_table)
                 pool.append(
                     MMAItem(
                         item_def.name,
@@ -120,8 +128,7 @@ class MuppetMonsterAdventureWorld(World):
                     )
                 )
             for _ in range(trap_count):
-                trap_idx = self.random.randrange(0, len(trap_items_table))
-                item_def = trap_items_table[trap_idx]
+                item_def = self.random.choice(trap_items_table)
                 pool.append(
                     MMAItem(
                         item_def.name,
@@ -140,6 +147,8 @@ class MuppetMonsterAdventureWorld(World):
         hub_region = self.get_region(LevelName.HUB.value)
         for region_def in all_locations_table:
             region = self.get_region(region_def.name)
+            # Hub can access all regions (when they are unlocked).
+            # All regions can access the Hub, always.
             _ = hub_region.connect(region, None, rules.Has(region_def.name))
             _ = region.connect(hub_region, None, None)
 
@@ -154,7 +163,8 @@ class MuppetMonsterAdventureWorld(World):
                     rule = rules.And(rule, rules.Or(*options))
                 self.set_rule(self.get_location(location.full_identifier), rule)
 
-        boss_locations = [loc.full_identifier + " event" for loc in location_type_lookup[LocationType.BOSS]]
-        print(f"Boss locations: {boss_locations}")
+        boss_locations = [
+            (cast(MMABossLocationData, loc)).get_event_name() for loc in location_type_lookup[LocationType.BOSS]
+        ]
         self.set_completion_rule(rules.HasAll(*boss_locations))
         return

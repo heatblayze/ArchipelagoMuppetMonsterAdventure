@@ -51,6 +51,7 @@ class LevelName(StrEnum):
     COWER_BEFORE_KER_MONSTER = "Cower Before... Ker-Monster!"
 
 
+# These are levels wherein you can always get at least one check with nothing.
 whitelisted_starting_levels: list[LevelName] = [
     LevelName.PEACOCK_PURGATORY,
     LevelName.HALLWAYS_OF_DOOM,

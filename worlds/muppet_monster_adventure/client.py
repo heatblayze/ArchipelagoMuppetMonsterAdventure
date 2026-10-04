@@ -371,6 +371,7 @@ class MMAGameState(MMAAddressTableConsumer):
                 ],
             )
         else:
+            # TODO: we need to write the cheat (or an alternative) that allows you to always return to the Hub.
             await self.player.write_flags(ctx)
         return True
 
@@ -668,9 +669,8 @@ class MMAClient(BizHawkClient):
             return
 
         if not self.was_save_loaded:
-            # TODO: read last received index from save data
             await self.state.initialize(ctx)
-        self.was_save_loaded = True
+            self.was_save_loaded = True
 
         if not await self.state.try_write_flags(ctx):
             # Game is loaded correctly, but is not in a state to write anything.
