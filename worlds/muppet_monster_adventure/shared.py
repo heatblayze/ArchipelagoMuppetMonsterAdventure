@@ -45,6 +45,10 @@ class LevelName(StrEnum):
     MOLTEN_MAYHEM = "Molten Mayhem"
     SHIVERING_TIMBER_SHOALS = "Shivering Timber Shoals"
     BEE_WARE_THE_WEREBEAR = "Bee-ware the WereBear!"
+    HIKE_OF_THE_HAUNTED = "Hike of the Haunted"
+    THE_RIVER_VILE = "The River Vile"
+    ESCAPE_CLAWS = "Escape Claws"
+    COWER_BEFORE_KER_MONSTER = "Cower Before... Ker-Monster!"
 
 
 whitelisted_starting_levels: list[LevelName] = [

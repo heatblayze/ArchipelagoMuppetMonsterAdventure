@@ -76,5 +76,15 @@ ntsc_addresses = AddressTable(
                 PickupAddress(active=0x01D4348, save=0x0CCDFC, save_offset=4),  # BONUS
             ]
         ),
+        LevelName.HIKE_OF_THE_HAUNTED: LevelPickupTable(
+            tokens=[
+                PickupAddress(active=0x01E6234, save=0x0CCEF8, save_offset=0),  # Big tree
+                PickupAddress(active=0x01E6208, save=0x0CCEF7, save_offset=6),  # Jump pads
+                PickupAddress(active=0x01E9C28, save=0x0CCF0E, save_offset=6),  # Totem shooting
+                PickupAddress(active=0x01EB824, save=0x0CCF16, save_offset=2),  # Gliding game
+                PickupAddress(active=0x01E61DC, save=0x0CCEF7, save_offset=4),  # Near gliding game
+                PickupAddress(active=0x01E324C, save=0x0CCECC, save_offset=4),  # BONUS
+            ]
+        ),
     },
 )

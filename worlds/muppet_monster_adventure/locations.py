@@ -428,6 +428,69 @@ level_groups: list[LevelGroup] = [
         ),
         boss=BossRegionData(LevelName.BEE_WARE_THE_WEREBEAR, [AbilityFlag.SPIN]),
     ),
+    LevelGroup(
+        identifier="FOREST",
+        one=LevelRegionData(
+            name=LevelName.HIKE_OF_THE_HAUNTED,
+            total_energy=400,
+            energy=EnergyLocationData(
+                half=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
+                full=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.ALL_WEAPONS],
+            ),
+            bonus=BonusLocationData(
+                b=[AbilityFlag.CLIMB | AbilityFlag.GLIDE],
+                o=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
+                n=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
+                u=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
+                s=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
+                token=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
+            ),
+            tokens=[
+                TokenLocationData("Next to big climbable tree", [AbilityFlag.CLIMB | AbilityFlag.GLIDE]),
+                TokenLocationData(
+                    "Follow the floating Super Jump Pads", [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE]
+                ),
+                TokenLocationData("Totem hunting", [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE]),
+                TokenLocationData("Gliding minigame", [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE]),
+                TokenLocationData("Near gliding minigame", [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE]),
+            ],
+        ),
+        two=LevelRegionData(
+            name=LevelName.THE_RIVER_VILE,
+            total_energy=420,
+            energy=EnergyLocationData(
+                half=[],
+                full=[],
+            ),
+            bonus=BonusLocationData(
+                b=[],
+                o=[],
+                n=[],
+                u=[],
+                s=[],
+                token=[],
+            ),
+            tokens=[],
+        ),
+        three=LevelRegionData(
+            name=LevelName.ESCAPE_CLAWS,
+            total_energy=450,
+            energy=EnergyLocationData(
+                half=[],
+                full=[],
+            ),
+            bonus=BonusLocationData(
+                b=[],
+                o=[],
+                n=[],
+                u=[],
+                s=[],
+                token=[],
+            ),
+            tokens=[],
+        ),
+        boss=BossRegionData(LevelName.COWER_BEFORE_KER_MONSTER, []),
+    ),
 ]
 
 all_locations_table: list[MMARegion] = []
