@@ -139,7 +139,9 @@ class LevelRegionData(NamedTuple):
     total_energy: int
     energy: EnergyLocationData
     bonus: BonusLocationData
+    # TODO: figure out a nice way to enforce index parity with the memory addresses...
     tokens: list[TokenLocationData]
+    # TODO: make amulets their own location type, instead of this.
     extra_locations: Sequence[MMALocationData] | None = None
 
 
