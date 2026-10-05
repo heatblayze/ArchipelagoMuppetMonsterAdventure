@@ -32,7 +32,9 @@ class MMALocationData:
         # Alternatives should be provided as a separate entry.
         # e.g. The location can be unlocked by either "climb and swim" OR "climb and glide".
         # This would be represented as: [AbilityFlag.CLIMB | AbilityFlag.SWIM, AbilityFlag.CLIMB | AbilityFlag.GLIDE]
-        self.ability_requirements = ability_requirements
+        self.ability_requirements = (
+            ability_requirements if ability_requirements is not None and len(ability_requirements) > 0 else None
+        )
         self.full_identifier: str = ""
 
     def ap_id(self) -> int:
