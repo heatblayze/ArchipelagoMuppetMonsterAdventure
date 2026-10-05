@@ -51,7 +51,6 @@ class MuppetMonsterAdventureWorld(World):
         self.starting_level: Item
         self.starter_items: list[Item] = []
         self.location_count: int = 0
-        self.region_events: list[tuple[str, str, rules.Rule | None]] = []
 
     def get_filler_item_name(self) -> str:
         return self.random.choice(filler_items_table).name
@@ -79,10 +78,6 @@ class MuppetMonsterAdventureWorld(World):
             for loc in region_def.locations:
                 self.location_count += 1
                 locations.update({loc.full_identifier: location_name_to_id[loc.full_identifier]})
-                if type(loc) is MMABossLocationData:
-                    # We need to store these for later since the events rely on regions and locations existing.
-                    # Some future events may also require items existing.
-                    self.region_events.append((region_def.name, loc.get_event_name(), None))
             region.add_locations(locations)
             regions.append(region)
         self.multiworld.regions.extend(regions)
@@ -95,7 +90,7 @@ class MuppetMonsterAdventureWorld(World):
         starter_level_name = self.random.choice(whitelisted_starting_levels)
         for item_def in required_items_table:
             item = MMAItem(item_def.name, item_def.classification, item_name_to_id[item_def.name], self.player)
-            if type(item_def) is not MMALevelItemData or item_def.name != starter_level_name:
+            if type(item_def) is not MMALevelItemData:
                 if type(item_def) is MMAAbilityItemData and (
                     item_def.ability_type == AbilityFlag.GLOVE or item_def.ability_type == AbilityFlag.SPIN
                 ):
@@ -103,17 +98,16 @@ class MuppetMonsterAdventureWorld(World):
                     self.starter_items.append(item)
                 else:
                     pool.append(item)
+            elif item_def.name != starter_level_name:
+                pool.append(item)
+                print(f"Adding level item: {item_def.name}")
             else:
                 self.starting_level = item
-
-        # Add event flags from regions
-        for region_name, location, rule in self.region_events:
-            region = self.get_region(region_name)
-            _ = region.add_event(location, rule=rule)
 
         # TODO: make the weights of these options
         # Add buffer filler items to pool
         diff = self.location_count - len(pool)
+        print(f"locations: {self.location_count}, items: {len(pool)}, diff: {diff}")
 
         trap_count = round(diff / 10)
         if diff > 0:
@@ -162,6 +156,9 @@ class MuppetMonsterAdventureWorld(World):
                         options.append(rules.HasAll(*items))
                     rule = rules.And(rule, rules.Or(*options))
                 self.set_rule(self.get_location(location.full_identifier), rule)
+                if type(location) is MMABossLocationData:
+                    # Same rule as the item location
+                    _ = region.add_event(location.get_event_name(), rule=rule)
 
         boss_locations = [
             (cast(MMABossLocationData, loc)).get_event_name() for loc in location_type_lookup[LocationType.BOSS]
