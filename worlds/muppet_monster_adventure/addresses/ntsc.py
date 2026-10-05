@@ -58,7 +58,7 @@ ntsc_addresses = AddressTable(
                 PickupAddress(active=0x01ED850, save=0x0CCD2C, save_offset=4),  # BONUS
             ]
         ),
-        LevelName.GRAVE_MATTERS: LevelPickupTable(
+        LevelName.MOLTEN_MAYHEM: LevelPickupTable(
             tokens=[
                 PickupAddress(active=0x01FB85C, save=0x0CCDDE, save_offset=4),  # Target shooting
                 PickupAddress(active=0x01FB660, save=0x0CCDDD, save_offset=6),  # Ghost hunt
@@ -67,7 +67,7 @@ ntsc_addresses = AddressTable(
                 PickupAddress(active=0x01F3CBC, save=0x0CCD94, save_offset=4),  # BONUS
             ]
         ),
-        LevelName.GRAVE_MATTERS: LevelPickupTable(
+        LevelName.SHIVERING_TIMBER_SHOALS: LevelPickupTable(
             tokens=[
                 PickupAddress(active=0x01DCDC0, save=0x0CCE4D, save_offset=4),  # Shells
                 PickupAddress(active=0x01D741C, save=0x0CCE28, save_offset=2),  # Behind smash wall

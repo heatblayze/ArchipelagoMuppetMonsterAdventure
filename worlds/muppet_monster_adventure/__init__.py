@@ -166,8 +166,8 @@ class MuppetMonsterAdventureWorld(World):
                 if type(location) is MMABossLocationData:
                     self.set_rule(self.get_location(location.get_event_name()), rule)
 
-        boss_locations = [
+        boss_event_locations = [
             (cast(MMABossLocationData, loc)).get_event_name() for loc in location_type_lookup[LocationType.BOSS]
         ]
-        self.set_completion_rule(rules.HasAll(*boss_locations))
+        self.set_completion_rule(rules.HasAll(*boss_event_locations))
         return
