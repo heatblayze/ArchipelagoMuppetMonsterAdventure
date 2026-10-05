@@ -23,6 +23,7 @@ from .locations import (
     location_name_to_id,
     location_type_lookup,
 )
+from .options import MMAOptions
 from .shared import AbilityFlag, LevelName, game_name, whitelisted_starting_levels
 
 
@@ -44,6 +45,8 @@ class MuppetMonsterAdventureWorld(World):
     location_name_to_id = location_name_to_id
     location_name_groups = location_name_groups
 
+    options_dataclass = MMAOptions
+    options: MMAOptions  # pyright: ignore[reportIncompatibleVariableOverride]
     origin_region_name = LevelName.HUB.value
 
     def __init__(self, multiworld: MultiWorld, player: int):
