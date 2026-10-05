@@ -78,7 +78,7 @@ class MuppetMonsterAdventureWorld(World):
             for loc in region_def.locations:
                 self.location_count += 1
                 locations.update({loc.full_identifier: location_name_to_id[loc.full_identifier]})
-            region.add_locations(locations)
+            region.add_locations(locations, MMALocation)
             regions.append(region)
         self.multiworld.regions.extend(regions)
         return
@@ -137,7 +137,7 @@ class MuppetMonsterAdventureWorld(World):
             for location in region_def.locations:
                 if type(location) is MMABossLocationData:
                     # Same rule as the item location
-                    _ = region.add_event(location.get_event_name())
+                    _ = region.add_event(location.get_event_name(), item_type=MMAItem)
         return
 
     def set_rules(self) -> None:
