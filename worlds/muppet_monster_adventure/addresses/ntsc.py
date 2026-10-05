@@ -86,5 +86,25 @@ ntsc_addresses = AddressTable(
                 PickupAddress(active=0x01E324C, save=0x0CCECC, save_offset=4),  # BONUS
             ]
         ),
+        LevelName.THE_RIVER_VILE: LevelPickupTable(
+            tokens=[
+                PickupAddress(active=0x01E4E34, save=0x0CCF5F, save_offset=6),  # Climb near checkpoint
+                PickupAddress(active=0x01E8648, save=0x0CCF74, save_offset=6),  # Rizzo
+                PickupAddress(active=0x01E4DDC, save=0x0CCF5F, save_offset=4),  # Atop the machine
+                PickupAddress(active=0x01E8500, save=0x0CCF74, save_offset=2),  # Spin game
+                PickupAddress(active=0x01E4DB0, save=0x0CCF5F, save_offset=2),  # Beaker
+                PickupAddress(active=0x01E1F74, save=0x0CCF34, save_offset=4),  # BONUS
+            ]
+        ),
+        LevelName.ESCAPE_CLAWS: LevelPickupTable(
+            tokens=[
+                PickupAddress(active=0x01FD684, save=0x0CCFEC, save_offset=2),  # Climbing
+                PickupAddress(active=0x01F7DBC, save=0x0CCFCB, save_offset=0),  # Bat switch
+                PickupAddress(active=0x01F7DE8, save=0x0CCFCB, save_offset=2),  # Near bonus
+                PickupAddress(active=0x01FB704, save=0x0CCFE0, save_offset=0),  # Willie
+                PickupAddress(active=0x01F7E14, save=0x0CCFCB, save_offset=4),  # After Willie
+                PickupAddress(active=0x01F489C, save=0x0CCF9C, save_offset=4),  # BONUS
+            ]
+        ),
     },
 )

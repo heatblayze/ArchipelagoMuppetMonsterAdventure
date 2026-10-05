@@ -29,10 +29,13 @@ class AbilityFlag(Flag):
 def any_weapon_flag(other: AbilityFlag | None = None) -> list[AbilityFlag]:
     if other is None:
         return [AbilityFlag.GLOVE, AbilityFlag.SPIN]
-    return [
-        other | AbilityFlag.GLOVE,
-        other | AbilityFlag.SPIN,
-    ]
+    return flag_variants(other, AbilityFlag.GLOVE, AbilityFlag.SPIN)
+
+
+# Helper function to generate location rules combining multiple variations of a single base rule.
+def flag_variants(base: AbilityFlag, *other: AbilityFlag) -> list[AbilityFlag]:
+    args: list[AbilityFlag] = list(other)
+    return [base | other_item for other_item in args]
 
 
 class LevelName(StrEnum):

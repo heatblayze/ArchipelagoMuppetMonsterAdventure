@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from enum import Enum, StrEnum
 from typing import NamedTuple
 
-from .shared import AbilityFlag, AmuletType, LevelName, any_weapon_flag, base_id
+from .shared import AbilityFlag, AmuletType, LevelName, any_weapon_flag, base_id, flag_variants
 
 
 class LocationType(Enum):
@@ -131,6 +131,7 @@ class BonusLocationData(NamedTuple):
     s: list[AbilityFlag] | None
     # We may not always be able to infer the requirements for this, since it could be off the path
     # and logic changes / new rules could make this different to just all letters combined.
+    # TODO: the generated rules for this should include the ability to get all the letters
     token: list[AbilityFlag] | None
 
 
@@ -291,7 +292,7 @@ level_groups: list[LevelGroup] = [
                 n=[AbilityFlag.SMASH | AbilityFlag.GLOVE],
                 u=[AbilityFlag.SMASH | AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE],
                 s=[AbilityFlag.SMASH | AbilityFlag.GLOVE],
-                token=[AbilityFlag.SMASH | AbilityFlag.GLOVE | AbilityFlag.CLIMB],
+                token=[AbilityFlag.SMASH | AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE],
             ),
             tokens=[
                 TokenLocationData("Rizzo", any_weapon_flag(AbilityFlag.SMASH)),
@@ -464,37 +465,63 @@ level_groups: list[LevelGroup] = [
             name=LevelName.THE_RIVER_VILE,
             total_energy=420,
             energy=EnergyLocationData(
-                half=[],
-                full=[],
+                half=flag_variants(
+                    AbilityFlag.GLIDE | AbilityFlag.SMASH,
+                    AbilityFlag.ALL_WEAPONS,
+                    *any_weapon_flag(AbilityFlag.CLIMB),
+                ),
+                full=[AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.ALL_WEAPONS | AbilityFlag.CLIMB],
             ),
             bonus=BonusLocationData(
-                b=[],
-                o=[],
-                n=[],
-                u=[],
-                s=[],
-                token=[],
+                b=[AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.CLIMB],
+                o=[AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.CLIMB],
+                n=[AbilityFlag.GLIDE | AbilityFlag.SMASH],
+                u=[AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.CLIMB],
+                s=[AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.CLIMB | AbilityFlag.GLOVE],
+                token=[AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.CLIMB | AbilityFlag.GLOVE],
             ),
-            tokens=[],
+            tokens=[
+                TokenLocationData(
+                    "Climb near the first checkpoint", [AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.CLIMB]
+                ),
+                TokenLocationData("Rizzo", any_weapon_flag(AbilityFlag.GLIDE | AbilityFlag.SMASH)),
+                TokenLocationData(
+                    "Atop the machine near Rizzo", [AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.CLIMB]
+                ),
+                TokenLocationData("Cog spinning minigame", [AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.SPIN]),
+                TokenLocationData(
+                    "Shoot Beaker", [AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.CLIMB | AbilityFlag.GLOVE]
+                ),
+            ],
         ),
         three=LevelRegionData(
             name=LevelName.ESCAPE_CLAWS,
             total_energy=450,
             energy=EnergyLocationData(
-                half=[],
-                full=[],
+                half=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
+                full=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.PUSH | AbilityFlag.ALL_WEAPONS],
             ),
             bonus=BonusLocationData(
-                b=[],
-                o=[],
-                n=[],
-                u=[],
-                s=[],
-                token=[],
+                b=[AbilityFlag.CLIMB | AbilityFlag.GLIDE],
+                o=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
+                n=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
+                u=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.PUSH],
+                s=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.PUSH],
+                token=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.PUSH],
             ),
-            tokens=[],
+            tokens=[
+                TokenLocationData("Climbing minigame", [AbilityFlag.CLIMB]),
+                TokenLocationData("Near bat switch", [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE]),
+                TokenLocationData("Near BONUS crate", [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE]),
+                TokenLocationData(
+                    "Race Willie", [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.PUSH]
+                ),
+                TokenLocationData(
+                    "After Willie", [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.PUSH]
+                ),
+            ],
         ),
-        boss=BossRegionData(LevelName.COWER_BEFORE_KER_MONSTER, []),
+        boss=BossRegionData(LevelName.COWER_BEFORE_KER_MONSTER, [AbilityFlag.GLOVE]),
     ),
 ]
 
