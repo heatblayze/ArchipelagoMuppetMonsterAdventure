@@ -133,6 +133,13 @@ class MuppetMonsterAdventureWorld(World):
                 )
 
         self.multiworld.itempool += pool
+
+        for region_def in all_locations_table:
+            region = self.get_region(region_def.name)
+            for location in region_def.locations:
+                if type(location) is MMABossLocationData:
+                    # Same rule as the item location
+                    _ = region.add_event(location.get_event_name())
         return
 
     def set_rules(self) -> None:
@@ -157,8 +164,7 @@ class MuppetMonsterAdventureWorld(World):
                     rule = rules.And(rule, rules.Or(*options))
                 self.set_rule(self.get_location(location.full_identifier), rule)
                 if type(location) is MMABossLocationData:
-                    # Same rule as the item location
-                    _ = region.add_event(location.get_event_name(), rule=rule)
+                    self.set_rule(self.get_location(location.get_event_name()), rule)
 
         boss_locations = [
             (cast(MMABossLocationData, loc)).get_event_name() for loc in location_type_lookup[LocationType.BOSS]
