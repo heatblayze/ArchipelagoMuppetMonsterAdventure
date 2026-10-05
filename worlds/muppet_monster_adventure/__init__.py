@@ -100,14 +100,12 @@ class MuppetMonsterAdventureWorld(World):
                     pool.append(item)
             elif item_def.name != starter_level_name:
                 pool.append(item)
-                print(f"Adding level item: {item_def.name}")
             else:
                 self.starting_level = item
 
         # TODO: make the weights of these options
         # Add buffer filler items to pool
         diff = self.location_count - len(pool)
-        print(f"locations: {self.location_count}, items: {len(pool)}, diff: {diff}")
 
         trap_count = round(diff / 10)
         if diff > 0:
