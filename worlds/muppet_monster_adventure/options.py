@@ -72,6 +72,7 @@ class TrapWeights(OptionCounter):
     default = {trap.name: 1 for trap in trap_items_table}
 
 
+# TODO: progressive morphs option? the order in the game is Climb, Swim, Glide, Smash, Push
 @dataclass
 class MMAOptions(PerGameCommonOptions):
     energy_thresholds: EnergyThresholds
