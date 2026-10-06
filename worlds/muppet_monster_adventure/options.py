@@ -4,7 +4,7 @@ from Options import OptionCounter, OptionSet, PerGameCommonOptions, Range, Toggl
 from worlds.muppet_monster_adventure.items import filler_items_table, trap_items_table
 
 
-class EnergyLocations(OptionCounter):
+class EnergyThresholds(OptionCounter):
     """Toggle individual Evil Energy check thresholds."""
 
     display_name = "Evil Energy Thresholds"
@@ -74,9 +74,10 @@ class TrapWeights(OptionCounter):
 
 @dataclass
 class MMAOptions(PerGameCommonOptions):
-    energy: EnergyLocations
-    bonus: BonusLocations
+    energy_thresholds: EnergyThresholds
+    bonus_sanity: BonusLocations
+    token_sanity: TokenLocations
     goal: BossGoal
     trap_ratio: TrapRatio
-    filler: FillerWeights
-    traps: TrapWeights
+    filler_weights: FillerWeights
+    trap_weights: TrapWeights
