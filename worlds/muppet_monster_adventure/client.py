@@ -468,6 +468,7 @@ class MMAGameState(MMAAddressTableConsumer):
             pass
         else:
             # TODO: Find a better method of checking this
+            # There 100% is, because the Hub displays bosses differently when I *actually* defeat them.
             bosses_beaten_bytes = await bizhawk.read(
                 ctx.bizhawk_ctx, [(self.address_table.bosses_beaten, 1, "MainRAM")]
             )

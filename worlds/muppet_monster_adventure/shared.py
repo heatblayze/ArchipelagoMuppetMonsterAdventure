@@ -59,6 +59,14 @@ class LevelName(StrEnum):
     ARABIAN_FRIGHTS = "Arabian Frights"
     FEELING_FLUSHED = "Feeling Flushed"
     THE_MUCK_MONSTER_SLIMETH = "The Muck Monster Slimeth"
+    HUT_HUT_HIKE = "Hut, Hut, Hike!"
+    TEMPLE_OF_PORK = "Temple of Pork"
+    THE_BLUEST_BAYOU = "The Bluest Bayou"
+    DOIN_THE_BRIDE_SLIDE = "Doin' the Bride Slide"
+    THE_MONSTERY_MONASTERY = "The Monstery Monastery"
+    ICE_TO_MEETCHA = "Ice to Meetcha!"
+    FOR_PETONS_SAKE = "For Peton's Sake"
+    THE_MYSTERY_OF_THE_MASTER = "The Mystery of... The Master!"
 
 
 # These are levels wherein you can always get at least one check with nothing.
