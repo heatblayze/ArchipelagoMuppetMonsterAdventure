@@ -32,10 +32,13 @@ def any_weapon_flag(other: AbilityFlag | None = None) -> list[AbilityFlag]:
     return flag_variants(other, AbilityFlag.GLOVE, AbilityFlag.SPIN)
 
 
-# Helper function to generate location rules combining multiple variations of a single base rule.
-def flag_variants(base: AbilityFlag, *other: AbilityFlag) -> list[AbilityFlag]:
+def flag_variants(shared_reqs: AbilityFlag, *other: AbilityFlag) -> list[AbilityFlag]:
+    """
+    Helper function to generate location rules combining multiple variations of a single base rule.
+    Usage: (sharedFlag1 | sharedFlag2 | sharedFlag3, variant1, variant2, etc.)
+    """
     args: list[AbilityFlag] = list(other)
-    return [base | other_item for other_item in args]
+    return [shared_reqs | other_item for other_item in args]
 
 
 class LevelName(StrEnum):
@@ -52,6 +55,10 @@ class LevelName(StrEnum):
     THE_RIVER_VILE = "The River Vile"
     ESCAPE_CLAWS = "Escape Claws"
     COWER_BEFORE_KER_MONSTER = "Cower Before... Ker-Monster!"
+    CROAK_LAHOMA = "Croak-Lahoma"
+    ARABIAN_FRIGHTS = "Arabian Frights"
+    FEELING_FLUSHED = "Feeling Flushed"
+    THE_MUCK_MONSTER_SLIMETH = "The Muck Monster Slimeth"
 
 
 # These are levels wherein you can always get at least one check with nothing.

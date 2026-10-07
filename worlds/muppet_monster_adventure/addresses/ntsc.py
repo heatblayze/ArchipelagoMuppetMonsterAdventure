@@ -106,5 +106,35 @@ ntsc_addresses = AddressTable(
                 PickupAddress(active=0x01F489C, save=0x0CCF9C, save_offset=4),  # BONUS
             ]
         ),
+        LevelName.CROAK_LAHOMA: LevelPickupTable(
+            tokens=[
+                PickupAddress(active=0x01F4EBC, save=0x0CD099, save_offset=6),  # Near BONUS O
+                PickupAddress(active=0x01F97C4, save=0x0CD0B5, save_offset=6),  # Ghost
+                PickupAddress(active=0x01F4F14, save=0x0CD09A, save_offset=2),  # Scarecrow
+                PickupAddress(active=0x01F4F14, save=0x0CD09A, save_offset=0),  # Barrel
+                PickupAddress(active=0x01F9F30, save=0x0CD0B8, save_offset=2),  # Smashing
+                PickupAddress(active=0x01F1E00, save=0x0CD06C, save_offset=4),  # BONUS
+            ]
+        ),
+        LevelName.ARABIAN_FRIGHTS: LevelPickupTable(
+            tokens=[
+                PickupAddress(active=0x01F6BC8, save=0x0CD102, save_offset=2),  # Ledge
+                PickupAddress(active=0x01FEBC8, save=0x0CD130, save_offset=6),  # Snakes
+                PickupAddress(active=0x01F6B9C, save=0x0CD102, save_offset=0),  # Near crate
+                PickupAddress(active=0x01F6BF4, save=0x0CD102, save_offset=4),  # Ledge 2
+                PickupAddress(active=0x01FD6C8, save=0x0CD128, save_offset=0),  # Percy
+                PickupAddress(active=0x01F3984, save=0x0CD0D4, save_offset=4),  # BONUS
+            ]
+        ),
+        LevelName.FEELING_FLUSHED: LevelPickupTable(
+            tokens=[
+                PickupAddress(active=0x01EB8B4, save=0x0CD16B, save_offset=4),  # Crack in pipe
+                PickupAddress(active=0x01EB8E0, save=0x0CD16B, save_offset=6),  # Near BONUS O
+                PickupAddress(active=0x01F0F58, save=0x0CD186, save_offset=4),  # Pushing puzzle
+                PickupAddress(active=0x01F106C, save=0x0CD187, save_offset=0),  # Rizzo
+                PickupAddress(active=0x01F106C, save=0x0CD16B, save_offset=2),  # Above Rizzo
+                PickupAddress(active=0x01E8364, save=0x0CD13C, save_offset=4),  # BONUS
+            ]
+        ),
     },
 )

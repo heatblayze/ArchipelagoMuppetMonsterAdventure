@@ -523,6 +523,111 @@ level_groups: list[LevelGroup] = [
         ),
         boss=BossRegionData(LevelName.COWER_BEFORE_KER_MONSTER, [AbilityFlag.GLOVE]),
     ),
+    LevelGroup(
+        identifier="VILLAGE",
+        one=LevelRegionData(
+            name=LevelName.CROAK_LAHOMA,
+            total_energy=450,
+            energy=EnergyLocationData(
+                half=[AbilityFlag.PUSH | AbilityFlag.GLOVE],
+                full=[AbilityFlag.PUSH | AbilityFlag.ALL_WEAPONS | AbilityFlag.SMASH | AbilityFlag.GLIDE],
+            ),
+            bonus=BonusLocationData(
+                b=[AbilityFlag.GLIDE],
+                o=None,
+                n=[AbilityFlag.PUSH | AbilityFlag.GLOVE],
+                u=[AbilityFlag.PUSH | AbilityFlag.GLOVE],
+                s=[AbilityFlag.PUSH | AbilityFlag.GLOVE],
+                token=[AbilityFlag.PUSH | AbilityFlag.GLOVE | AbilityFlag.GLIDE],
+            ),
+            tokens=[
+                TokenLocationData("Near BONUS letter O", [AbilityFlag.GLIDE]),
+                TokenLocationData("Ghost hunting", [AbilityFlag.PUSH | AbilityFlag.ALL_WEAPONS]),
+                TokenLocationData("Guarded by an evil scarecrow", [AbilityFlag.PUSH | AbilityFlag.GLOVE]),
+                TokenLocationData("By a pink barrel", [AbilityFlag.PUSH | AbilityFlag.GLOVE]),
+                TokenLocationData("Smash the water things", [AbilityFlag.PUSH | AbilityFlag.GLOVE | AbilityFlag.SMASH]),
+            ],
+        ),
+        two=LevelRegionData(
+            name=LevelName.ARABIAN_FRIGHTS,
+            total_energy=480,
+            energy=EnergyLocationData(
+                half=[AbilityFlag.ALL_WEAPONS | AbilityFlag.CLIMB | AbilityFlag.PUSH],
+                full=[AbilityFlag.ALL_WEAPONS | AbilityFlag.CLIMB | AbilityFlag.PUSH | AbilityFlag.GLIDE],
+            ),
+            bonus=BonusLocationData(
+                b=None,
+                o=flag_variants(AbilityFlag.GLOVE | AbilityFlag.CLIMB, AbilityFlag.PUSH, AbilityFlag.GLIDE),
+                n=[AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.PUSH | AbilityFlag.GLIDE],
+                u=[AbilityFlag.ALL_WEAPONS | AbilityFlag.CLIMB],
+                s=[AbilityFlag.ALL_WEAPONS | AbilityFlag.CLIMB | AbilityFlag.GLIDE],
+                token=[AbilityFlag.ALL_WEAPONS | AbilityFlag.CLIMB | AbilityFlag.PUSH | AbilityFlag.GLIDE],
+            ),
+            tokens=[
+                TokenLocationData(
+                    "On a hidden ledge near rolling barrels",
+                    flag_variants(AbilityFlag.GLOVE | AbilityFlag.CLIMB, AbilityFlag.PUSH, AbilityFlag.GLIDE),
+                ),
+                TokenLocationData(
+                    "Snake catching",
+                    flag_variants(AbilityFlag.GLOVE | AbilityFlag.CLIMB, AbilityFlag.PUSH, AbilityFlag.GLIDE),
+                ),
+                TokenLocationData(
+                    "Above a pushable crate",
+                    [AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.PUSH | AbilityFlag.GLIDE],
+                ),
+                TokenLocationData(
+                    "On a hidden ledge near pushable crates",
+                    [AbilityFlag.ALL_WEAPONS | AbilityFlag.CLIMB | AbilityFlag.PUSH],
+                ),
+                TokenLocationData(
+                    "Race Percy",
+                    [AbilityFlag.ALL_WEAPONS | AbilityFlag.CLIMB | AbilityFlag.PUSH],
+                ),
+            ],
+        ),
+        three=LevelRegionData(
+            name=LevelName.FEELING_FLUSHED,
+            total_energy=500,
+            energy=EnergyLocationData(
+                half=[AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
+                full=[],
+            ),
+            bonus=BonusLocationData(
+                # Is technically *meant* to require swim, but the "trick" is not only
+                # incredibly easy but incredibly obvious as well.
+                b=None,
+                o=[AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
+                n=[AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
+                u=[AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
+                s=[AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH | AbilityFlag.SWIM],
+                token=[AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH | AbilityFlag.SWIM],
+            ),
+            tokens=[
+                TokenLocationData(
+                    "In a crack in a pipe",
+                    [AbilityFlag.GLOVE | AbilityFlag.GLIDE],
+                ),
+                TokenLocationData(
+                    "Near BONUS letter 0",
+                    [AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
+                ),
+                TokenLocationData(
+                    "Pushing puzzle",
+                    [AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
+                ),
+                TokenLocationData(
+                    "Rizzo",
+                    [AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
+                ),
+                TokenLocationData(
+                    "Above Rizzo",
+                    [AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
+                ),
+            ],
+        ),
+        boss=BossRegionData(LevelName.THE_MUCK_MONSTER_SLIMETH, None),  # wow
+    ),
 ]
 
 all_locations_table: list[MMARegion] = []
