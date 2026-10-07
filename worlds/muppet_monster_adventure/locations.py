@@ -591,7 +591,7 @@ level_groups: list[LevelGroup] = [
             total_energy=500,
             energy=EnergyLocationData(
                 half=[AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
-                full=[],
+                full=[AbilityFlag.ALL_WEAPONS | AbilityFlag.GLIDE | AbilityFlag.PUSH | AbilityFlag.SWIM],
             ),
             bonus=BonusLocationData(
                 # Is technically *meant* to require swim, but the "trick" is not only
