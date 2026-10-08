@@ -295,7 +295,7 @@ level_groups: list[LevelGroup] = [
                 token=[AbilityFlag.SMASH | AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE],
             ),
             tokens=[
-                TokenLocationData("Rizzo", any_weapon_flag(AbilityFlag.SMASH)),
+                TokenLocationData("Catch Rizzo", any_weapon_flag(AbilityFlag.SMASH)),
                 TokenLocationData(
                     "On top of the bookshelves", [AbilityFlag.SMASH | AbilityFlag.GLOVE | AbilityFlag.CLIMB]
                 ),
@@ -373,7 +373,7 @@ level_groups: list[LevelGroup] = [
                 token=[AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.SWIM],
             ),
             tokens=[
-                TokenLocationData("Rizzo", any_weapon_flag()),
+                TokenLocationData("Catch Rizzo", any_weapon_flag()),
                 TokenLocationData("On pillar near Rizzo", [AbilityFlag.PUSH]),
                 TokenLocationData(
                     "Skull memory minigame",
@@ -484,7 +484,7 @@ level_groups: list[LevelGroup] = [
                 TokenLocationData(
                     "Climb near the first checkpoint", [AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.CLIMB]
                 ),
-                TokenLocationData("Rizzo", any_weapon_flag(AbilityFlag.GLIDE | AbilityFlag.SMASH)),
+                TokenLocationData("Catch Rizzo", any_weapon_flag(AbilityFlag.GLIDE | AbilityFlag.SMASH)),
                 TokenLocationData(
                     "Atop the machine near Rizzo", [AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.CLIMB]
                 ),
@@ -617,7 +617,7 @@ level_groups: list[LevelGroup] = [
                     [AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
                 ),
                 TokenLocationData(
-                    "Rizzo",
+                    "Catch Rizzo",
                     [AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
                 ),
                 TokenLocationData(
@@ -686,37 +686,87 @@ level_groups: list[LevelGroup] = [
             name=LevelName.TEMPLE_OF_PORK,
             total_energy=520,
             energy=EnergyLocationData(
-                half=[],
-                full=[],
+                half=[AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
+                full=[AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.ALL_WEAPONS | AbilityFlag.SWIM],
             ),
             bonus=BonusLocationData(
-                b=[],
-                o=[],
-                n=[],
-                u=[],
-                s=[],
-                token=[],
+                b=None,
+                o=[AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
+                n=[AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
+                u=[AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
+                s=[AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
+                token=[AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
             ),
-            tokens=[],
+            tokens=[
+                TokenLocationData(
+                    "Above the swimming tunnel",
+                    [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
+                ),
+                TokenLocationData(
+                    "On a hanging platform above the swimming tunnel",
+                    [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
+                ),
+                TokenLocationData(
+                    "Block pushing puzzle",
+                    [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.ALL_WEAPONS | AbilityFlag.SWIM],
+                ),
+                TokenLocationData(
+                    "Hunt the Golden Statues",
+                    [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
+                ),
+                TokenLocationData(
+                    "Next to the statue hunting minigame",
+                    [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
+                ),
+                TokenLocationData(
+                    "Next to BONUS letter S",
+                    [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
+                ),
+            ],
         ),
         three=LevelRegionData(
             name=LevelName.THE_BLUEST_BAYOU,
             total_energy=550,
             energy=EnergyLocationData(
-                half=[],
-                full=[],
+                half=[AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.SWIM],
+                full=[AbilityFlag.ALL_WEAPONS | AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.SWIM],
             ),
             bonus=BonusLocationData(
-                b=[],
+                b=[AbilityFlag.SWIM],
                 o=[],
-                n=[],
-                u=[],
-                s=[],
-                token=[],
+                n=[AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE],
+                u=[AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.SWIM],
+                s=[AbilityFlag.SWIM],
+                token=[AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.SWIM],
             ),
-            tokens=[],
+            tokens=[
+                TokenLocationData(
+                    "In the bayou?",
+                    [AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE],
+                ),
+                TokenLocationData(
+                    "Above the BONUS letter S",
+                    [AbilityFlag.SWIM | AbilityFlag.CLIMB],
+                ),
+                TokenLocationData(
+                    "Catch Rizzo",
+                    [AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.SWIM],
+                ),
+                TokenLocationData(
+                    "Above the steaming cauldron",
+                    [AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.SWIM],
+                ),
+                TokenLocationData(
+                    "Pearl hunting",
+                    [AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.SWIM],
+                ),
+                TokenLocationData(
+                    "Sitting on a stump",
+                    [AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.SWIM],
+                ),
+            ],
         ),
-        boss=BossRegionData(LevelName.DOIN_THE_BRIDE_SLIDE, None),
+        boss=BossRegionData(LevelName.DOIN_THE_BRIDE_SLIDE, None),  # incredible
     ),
     LevelGroup(
         identifier="ICEMONT",

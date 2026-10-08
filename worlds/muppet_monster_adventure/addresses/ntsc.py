@@ -147,7 +147,27 @@ ntsc_addresses = AddressTable(
                 PickupAddress(active=0x01EAFC8, save=0x0CD20C, save_offset=4),  # BONUS
             ]
         ),
-        LevelName.TEMPLE_OF_PORK: LevelPickupTable(tokens=[]),
-        LevelName.THE_BLUEST_BAYOU: LevelPickupTable(tokens=[]),
+        LevelName.TEMPLE_OF_PORK: LevelPickupTable(
+            tokens=[
+                PickupAddress(active=0x01EF9E8, save=0x0CD2A2, save_offset=4),  # Above tunnel
+                PickupAddress(active=0x01EF964, save=0x0CD2A1, save_offset=6),  # Hanging in tunnel
+                PickupAddress(active=0x01F6130, save=0x0CD2C4, save_offset=0),  # Blocks
+                PickupAddress(active=0x01F6E0C, save=0x0CD2C8, save_offset=0),  # Statue hunt
+                PickupAddress(active=0x01EF9BC, save=0x0CD2A2, save_offset=2),  # Next to statue hunt
+                PickupAddress(active=0x01EF990, save=0x0CD2A2, save_offset=0),  # Next to BONUS S
+                PickupAddress(active=0x01EC600, save=0x0CD274, save_offset=4),  # BONUS
+            ]
+        ),
+        LevelName.THE_BLUEST_BAYOU: LevelPickupTable(
+            tokens=[
+                PickupAddress(active=0x01F69AC, save=0x0CD30B, save_offset=6),  # Bayou?
+                PickupAddress(active=0x01F6928, save=0x0CD30B, save_offset=0),  # Above BONUS S
+                PickupAddress(active=0x01FB3BC, save=0x0CD325, save_offset=6),  # Rizzo
+                PickupAddress(active=0x01F6954, save=0x0CD30B, save_offset=2),  # Cauldron
+                PickupAddress(active=0x01FBEE4, save=0x0CD329, save_offset=2),  # Pearl hunting
+                PickupAddress(active=0x01F6980, save=0x0CD30B, save_offset=4),  # On a stump
+                PickupAddress(active=0x01F3590, save=0x0CD2DC, save_offset=4),  # BONUS
+            ]
+        ),
     },
 )
