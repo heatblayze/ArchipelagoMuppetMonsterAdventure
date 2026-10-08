@@ -136,5 +136,18 @@ ntsc_addresses = AddressTable(
                 PickupAddress(active=0x01E8364, save=0x0CD13C, save_offset=4),  # BONUS
             ]
         ),
+        LevelName.HUT_HUT_HIKE: LevelPickupTable(
+            tokens=[
+                PickupAddress(active=0x01EE56C, save=0x0CD23B, save_offset=6),  # Behind start
+                PickupAddress(active=0x01EE598, save=0x0CD23C, save_offset=0),  # In hut
+                PickupAddress(active=0x01EE5F0, save=0x0CD23C, save_offset=4),  # Puffer fish
+                PickupAddress(active=0x01F1944, save=0x0CD250, save_offset=6),  # Shark race
+                PickupAddress(active=0x01EE5C4, save=0x0CD23C, save_offset=2),  # Smash hut 2
+                PickupAddress(active=0x01F2C0C, save=0x0CD256, save_offset=2),  # Soup
+                PickupAddress(active=0x01EAFC8, save=0x0CD20C, save_offset=4),  # BONUS
+            ]
+        ),
+        LevelName.TEMPLE_OF_PORK: LevelPickupTable(tokens=[]),
+        LevelName.THE_BLUEST_BAYOU: LevelPickupTable(tokens=[]),
     },
 )

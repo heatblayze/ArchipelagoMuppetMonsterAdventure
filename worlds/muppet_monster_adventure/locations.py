@@ -634,18 +634,53 @@ level_groups: list[LevelGroup] = [
             name=LevelName.HUT_HUT_HIKE,
             total_energy=500,
             energy=EnergyLocationData(
-                half=[],
-                full=[],
+                # Nothing: 71
+                # Spin: +24 (95)
+                # Glove: +38 (109)
+                # Swim: +146 (217)
+                # Smash: +6 (77)
+                # Smash+Spin: +48 (119)
+                half=flag_variants(
+                    AbilityFlag.SWIM,
+                    AbilityFlag.GLOVE,
+                    AbilityFlag.SMASH | AbilityFlag.SPIN,
+                ),
+                full=[AbilityFlag.ALL_WEAPONS | AbilityFlag.SMASH | AbilityFlag.SWIM],
             ),
             bonus=BonusLocationData(
-                b=[],
-                o=[],
-                n=[],
-                u=[],
-                s=[],
-                token=[],
+                b=None,
+                o=[AbilityFlag.SMASH],
+                n=None,
+                u=[AbilityFlag.ALL_WEAPONS | AbilityFlag.SWIM],
+                s=[AbilityFlag.SWIM],
+                token=[AbilityFlag.ALL_WEAPONS | AbilityFlag.SWIM | AbilityFlag.SMASH],
             ),
-            tokens=[],
+            tokens=[
+                TokenLocationData(
+                    "Behind the start",
+                    None,
+                ),
+                TokenLocationData(
+                    "Inside a smashable hut",
+                    [AbilityFlag.SMASH],
+                ),
+                TokenLocationData(
+                    "In the pufferfish-filled tunnel",
+                    [AbilityFlag.SWIM],
+                ),
+                TokenLocationData(
+                    "Race the Shark",
+                    [AbilityFlag.SWIM],
+                ),
+                TokenLocationData(
+                    "Guarded by an enemy inside a smashable hut",
+                    [AbilityFlag.ALL_WEAPONS | AbilityFlag.SWIM | AbilityFlag.SMASH],
+                ),
+                TokenLocationData(
+                    "Gather ingredients for soup",
+                    [AbilityFlag.ALL_WEAPONS | AbilityFlag.SWIM | AbilityFlag.GLIDE],
+                ),
+            ],
         ),
         two=LevelRegionData(
             name=LevelName.TEMPLE_OF_PORK,
