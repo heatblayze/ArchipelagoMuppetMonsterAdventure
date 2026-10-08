@@ -469,7 +469,7 @@ class MMAGameState(MMAAddressTableConsumer):
         else:
             # TODO: Find a better method of checking this
             # There 100% is, because the Hub displays bosses differently when I *actually* defeat them.
-            # Nope! That's a bust. The game colours it gold when you have visited the level + defeated it.
+            # Nope! That's a bust. The game colours it gold when you have visited the level + have this address below high enough.
             bosses_beaten_bytes = await bizhawk.read(
                 ctx.bizhawk_ctx, [(self.address_table.bosses_beaten, 1, "MainRAM")]
             )
