@@ -169,5 +169,18 @@ ntsc_addresses = AddressTable(
                 PickupAddress(active=0x01F3590, save=0x0CD2DC, save_offset=4),  # BONUS
             ]
         ),
+        LevelName.THE_MONSTERY_MONASTERY: LevelPickupTable(
+            tokens=[
+                PickupAddress(active=0x01E9660, save=0x0CD3F6, save_offset=0),  # Rizzo
+                PickupAddress(active=0x01E5F9C, save=0x0CD3DE, save_offset=6),  # Water
+                PickupAddress(active=0x01EA06C, save=0x0CD3F9, save_offset=0),  # Ghost
+                PickupAddress(active=0x01E5FC8, save=0x0CD3DF, save_offset=0),  # Beaker
+                PickupAddress(active=0x01E5FF4, save=0x0CD3DF, save_offset=2),  # Platform
+                PickupAddress(active=0x01E6020, save=0x0CD3DF, save_offset=4),  # Hidden
+                PickupAddress(active=0x01E5FF4, save=0x0CD3AC, save_offset=4),  # BONUS
+            ]
+        ),
+        LevelName.ICE_TO_MEETCHA: LevelPickupTable(tokens=[]),
+        LevelName.FOR_PETONS_SAKE: LevelPickupTable(tokens=[]),
     },
 )

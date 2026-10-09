@@ -774,18 +774,31 @@ level_groups: list[LevelGroup] = [
             name=LevelName.THE_MONSTERY_MONASTERY,
             total_energy=550,
             energy=EnergyLocationData(
-                half=[],
-                full=[],
+                half=[AbilityFlag.GLOVE],
+                full=[AbilityFlag.ALL_WEAPONS | AbilityFlag.SMASH | AbilityFlag.GLIDE | AbilityFlag.SWIM],
             ),
             bonus=BonusLocationData(
-                b=[],
-                o=[],
-                n=[],
-                u=[],
-                s=[],
-                token=[],
+                b=[AbilityFlag.SWIM],
+                o=[AbilityFlag.GLOVE | AbilityFlag.SMASH | AbilityFlag.GLIDE | AbilityFlag.SWIM],
+                n=None,
+                u=[AbilityFlag.GLOVE | AbilityFlag.SMASH | AbilityFlag.GLIDE],
+                s=None,
+                token=[AbilityFlag.GLOVE | AbilityFlag.SMASH | AbilityFlag.GLIDE | AbilityFlag.SWIM],
             ),
-            tokens=[],
+            tokens=[
+                TokenLocationData("Catch Rizzo", any_weapon_flag()),
+                TokenLocationData("In the water by the start", [AbilityFlag.SWIM]),
+                TokenLocationData("Ghost hunting", [AbilityFlag.GLOVE | AbilityFlag.SMASH | AbilityFlag.SPIN]),
+                TokenLocationData("Shoot Beaker", [AbilityFlag.GLOVE | AbilityFlag.SMASH | AbilityFlag.GLIDE]),
+                TokenLocationData(
+                    "On a floating platform",
+                    [AbilityFlag.GLOVE | AbilityFlag.SMASH | AbilityFlag.GLIDE | AbilityFlag.SWIM],
+                ),
+                TokenLocationData(
+                    "In a hidden room next to the exit",
+                    [AbilityFlag.GLOVE | AbilityFlag.SMASH | AbilityFlag.GLIDE | AbilityFlag.SWIM],
+                ),
+            ],
         ),
         two=LevelRegionData(
             name=LevelName.ICE_TO_MEETCHA,
@@ -821,7 +834,7 @@ level_groups: list[LevelGroup] = [
             ),
             tokens=[],
         ),
-        boss=BossRegionData(LevelName.DOIN_THE_BRIDE_SLIDE, None),
+        boss=BossRegionData(LevelName.THE_MYSTERY_OF_THE_MASTER, None),
     ),
 ]
 
