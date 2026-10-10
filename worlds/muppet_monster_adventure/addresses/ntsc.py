@@ -180,7 +180,27 @@ ntsc_addresses = AddressTable(
                 PickupAddress(active=0x01E5FF4, save=0x0CD3AC, save_offset=4),  # BONUS
             ]
         ),
-        LevelName.ICE_TO_MEETCHA: LevelPickupTable(tokens=[]),
-        LevelName.FOR_PETONS_SAKE: LevelPickupTable(tokens=[]),
+        LevelName.ICE_TO_MEETCHA: LevelPickupTable(
+            tokens=[
+                PickupAddress(active=0x01F6F84, save=0x0CD446, save_offset=0),  # Pillar
+                PickupAddress(active=0x01F6FB0, save=0x0CD446, save_offset=2),  # Two snowmen
+                PickupAddress(active=0x01FCC4C, save=0x0CD468, save_offset=0),  # Target shooting
+                PickupAddress(active=0x01F6FDC, save=0x0CD446, save_offset=4),  # One snowman
+                PickupAddress(active=0x01F7008, save=0x0CD446, save_offset=6),  # Archway
+                PickupAddress(active=0x01FCB38, save=0x0CD467, save_offset=4),  # Cracking game
+                PickupAddress(active=0x01F3774, save=0x0CD414, save_offset=4),  # BONUS
+            ]
+        ),
+        LevelName.FOR_PETONS_SAKE: LevelPickupTable(
+            tokens=[
+                PickupAddress(active=0x01F3C4C, save=0x0CD4A9, save_offset=4),  # Ice slide
+                PickupAddress(active=0x01F3C20, save=0x0CD4A9, save_offset=2),  # Near gliding game
+                PickupAddress(active=0x01FA194, save=0x0CD4CF, save_offset=0),  # Gliding
+                PickupAddress(active=0x01F705C, save=0x0CD4BE, save_offset=0),  # Charlie
+                PickupAddress(active=0x01F3C78, save=0x0CD4A9, save_offset=6),  # Tower
+                PickupAddress(active=0x01F3CA4, save=0x0CD4AA, save_offset=0),  # Exit
+                PickupAddress(active=0x01F073C, save=0x0CD47C, save_offset=4),  # BONUS
+            ]
+        ),
     },
 )
