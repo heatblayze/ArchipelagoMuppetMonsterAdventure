@@ -32,6 +32,7 @@ from .shared import (
     TrapType,
     game_name,
 )
+from .message import MessageDisplay
 
 
 class MMAAddressTableConsumer:
@@ -106,6 +107,7 @@ class MMALevelState(MMAAddressTableConsumer):
     bonus_offset: int = 0
     energy_offset: int = 4
     energy_size: int = 2
+    region: MMARegion
 
     def __init__(
         self,
@@ -630,6 +632,7 @@ class MMAClient(BizHawkClient):
     # Memory sizes
     game_identifier_size: ClassVar[int] = 11
     level_name_size: ClassVar[int] = 10
+    messageDisplay: MessageDisplay
 
     version_addresses: ClassVar[dict[str, AddressTable]] = {
         "SLUS_012.38": ntsc_addresses,
@@ -692,6 +695,7 @@ class MMAClient(BizHawkClient):
         ctx.items_handling = self.items_handling
         ctx.want_slot_data = True
         ctx.watcher_timeout = 0.125
+        self.messageDisplay = MessageDisplay(found_table)
         return True
 
     def on_package(self, ctx: "BizHawkClientContext", cmd: str, args: dict[object, object]) -> None:
@@ -738,6 +742,16 @@ class MMAClient(BizHawkClient):
                         (self.address_table.cheat_permanent_morph_unlock, (0).to_bytes(1, "little"), "MainRAM"),
                     ],
                 )
+            elif self.state.active_level_name == "HUB":
+                await self.messageDisplay.updateHubMessage(ctx)
+
+            # Disable Pepe's UI messages
+            if self.state.active_level_name in self.state.level_states:
+                activeLevel = self.state.level_states[self.state.active_level_name]
+                await self.messageDisplay.updateMiniGameMessages(ctx, activeLevel.region.name)
+                await self.messageDisplay.disablePepeMessages(ctx, activeLevel.region.name)
+            else:
+                await self.messageDisplay.clearPepeMessage(ctx)
 
             # TODO: probably others
             if (

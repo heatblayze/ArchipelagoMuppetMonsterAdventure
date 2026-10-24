@@ -1,5 +1,5 @@
 from ..shared import LevelName
-from .structs import AddressTable, LevelPickupTable, PickupAddress
+from .structs import AddressTable, LevelPickupTable, MiniGameAddress, MiniGameTable, PickupAddress
 
 ntsc_addresses = AddressTable(
     # This is the number of frames the physics/timer engine runs (for the chicken timer and more?)
@@ -10,6 +10,10 @@ ntsc_addresses = AddressTable(
     active_level_name=0x0B87F8,
     custom_save_data=0x0CCBCE,
     active_save_index=0x0CCAE8,
+    pepe_message_ui_pointer=0x0BB21C,
+    pepe_message_message_pointer=0x0BB220,
+    pepe_message_ui_counter=0x0BB224,
+    # Game trackers and flags
     bosses_beaten=0x0B8904,
     level_unlock_states=0x0AA0C4,
     zone_unlocked_count=0x0E22F0,
@@ -226,6 +230,112 @@ ntsc_addresses = AddressTable(
                 PickupAddress(active=0x01F3C78, save=0x0CD4A9, save_offset=6),  # Tower
                 PickupAddress(active=0x01F3CA4, save=0x0CD4AA, save_offset=0),  # Exit
                 PickupAddress(active=0x01F073C, save=0x0CD47C, save_offset=4),  # BONUS
+            ]
+        ),
+    },
+    level_hub_message=0x14CE9C,
+    # Location of any mini-game in the game, per level
+    level_minigame_data={
+        LevelName.PEACOCK_PURGATORY: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14DC46, start=0x14DCB9, name="Percy Peacock Race"), # Race against Percy the Peacock
+                MiniGameAddress(retry=0x14E13F, start=0x14E18D, name="Sunflower Climb"), # Sunflower climb game
+            ]
+        ),
+        LevelName.HALLWAYS_OF_DOOM: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14D2AD, start=0x14D30C, name="Smash the Armour"), # Smashing the Suits of Armour game
+            ],
+        ),
+        LevelName.POKER_FACES: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CF57, start=0x14CFAD, name="Push Blocks"), # Pushing Block game
+                MiniGameAddress(retry=0x14D52F, start=0x14D574, name="Shoot the Paragliders"), # Chicken shooter target mini-game near Beaker
+            ]
+        ),
+        LevelName.GRAVE_MATTERS: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CF64, start=0x14CFA2, name="Spin the Skulls"), # Mimic Memory game
+            ]
+        ),
+        LevelName.MOLTEN_MAYHEM: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CF2B, start=0x14CF7C, name="Ghost Buster"), # Chasing the ghost game
+                MiniGameAddress(retry=0x14D08F, start=0x14D0F0, name="Shoot the Lava Targets"), # Shoot targets that rise up out of the 
+            ]
+        ),
+        LevelName.SHIVERING_TIMBER_SHOALS: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CEDC, start=0x14CF1A, name="Shell Hunt"), # Hunting for Shells
+                MiniGameAddress(retry=0x14D03E, start=0x14D0B1, name="Race the Pogo"), # Race against Simon the Pogoer
+            ]
+        ),
+        LevelName.HIKE_OF_THE_HAUNTED: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CF17, start=0x14CF64, name="Fly Through Hoops"), # Glinding through Hoops
+                MiniGameAddress(retry=0x14D135, start=0x14D173, name="Totem Destruction"), # Destroying the Totems
+            ]
+        ),
+        LevelName.THE_RIVER_VILE: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CFB5, start=0x14CFF7, name="Cog Cycling"), # Match the pattern of colours
+            ]
+        ),
+        LevelName.ESCAPE_CLAWS: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CEDC, start=0x14CF27, name="Mushroom Collecting"), # Collecting Toadstools
+                MiniGameAddress(retry=0x14D122, start=0x14D195, name="Run Wolf Run"), # Race against Willie the little Wolf
+            ]
+        ),
+        LevelName.CROAK_LAHOMA: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CF33, start=0x14CF84, name="Ghost Buster Again"), # Hunting for a Ghost
+                MiniGameAddress(retry=0x14D1A8, start=0x14D207, name="Smashing Barrels"), # Smashing the Barrels around the level
+            ]
+        ),
+        LevelName.ARABIAN_FRIGHTS: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CF17, start=0x14CFE1, name="Snake n Ladders"), # Climb the pillars to find the Snakes
+                MiniGameAddress(retry=0x14D100, start=0x14D173, name="Flee the Fake Percy!"), # Race against Percy the Peacock
+            ]
+        ),
+        LevelName.FEELING_FLUSHED: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CED4, start=0x14CF2A, name="Block the Electricity"), # Move the blocks to stop the electricity
+            ]
+        ),
+        LevelName.HUT_HUT_HIKE: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14D020, start=0x14D08C, name="Race the Shark"), # Race against the Shark
+                MiniGameAddress(retry=0x14D1B0, start=0x14D213, name="Eat Your Vegetables"), # Hunt for Vegetables
+            ]
+        ),
+        LevelName.TEMPLE_OF_PORK: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CF1F, start=0x14CF90, name="Hunt For the Golden Idol"), # Find the Golden Statues on the level
+                MiniGameAddress(retry=0x14D0E1, start=0x14D132, name="Push More Blocks"), # Move even more blocks
+            ]
+        ),
+        LevelName.THE_BLUEST_BAYOU: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CF01, start=0x14CF4E, name="Diving for Pearls"), # Looking for pearls in clams
+            ]
+        ),
+        LevelName.THE_MONSTERY_MONASTERY: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CF0C, start=0x14CF4E, name="Ghost Buster Afterlife"), # Looking for a ghost again
+            ]
+        ),
+        LevelName.ICE_TO_MEETCHA: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CF64, start=0x14CFAC, name="Shoot Mr Popper's Penguins"), # Shooting at birds with the chicken gun
+                MiniGameAddress(retry=0x14D1B7, start=0x14D20A, name="The Statues Smashes Back"), # Smashing Statues around the level
+            ]
+        ),
+        LevelName.FOR_PETONS_SAKE: MiniGameTable(
+            minigames=[
+                MiniGameAddress(retry=0x14CF1F, start=0x14CF6B, name="Glinding Around"), # Gliding mini-game
+                MiniGameAddress(retry=0x14D054, start=0x14D0C0, name="Race against Charles the Penguin"), # Race against Charles the Penguin
             ]
         ),
     },
