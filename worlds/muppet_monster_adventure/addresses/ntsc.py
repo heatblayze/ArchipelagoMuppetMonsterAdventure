@@ -28,6 +28,7 @@ ntsc_addresses = AddressTable(
     # We should update this to include said data, and then just ignore it.
     level_state=0x0CCB86,
     last_pickup=0x0B8698,
+    mini_game_timer=0x0CA32C,
     chicken_timer=0x0B7F20,
     # Cheat locations in the memory
     cheat_menu_level_select=0x0AF184,

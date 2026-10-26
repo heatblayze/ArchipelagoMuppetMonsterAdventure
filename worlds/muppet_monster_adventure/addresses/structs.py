@@ -110,6 +110,9 @@ class AddressTable(NamedTuple):
     last_pickup: int
     """Stores the memory address of the last pickup"""
 
+    mini_game_timer: int
+    """Stores the current mini-game counter"""
+
     chicken_timer: int
     """Timer for the Chicken Gun (4 bytes) - signed"""
 

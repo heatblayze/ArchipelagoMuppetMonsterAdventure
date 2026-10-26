@@ -242,6 +242,10 @@ class MMAPlayerState(MMAAddressTableConsumer):
 
     packed_size: int = MMAMorphState.packed_size + 2
 
+    savedChickenTimer: int = 0
+    """Used for saving the current timer when in a mini-game/transition"""
+    pauseChickenTimer: bool = False
+
     def __init__(self, address_table: AddressTable) -> None:
         super().__init__(address_table)
         self.morphs: MMAMorphState = MMAMorphState()
@@ -315,7 +319,7 @@ class MMAPlayerState(MMAAddressTableConsumer):
         )
 
     async def change_current_lives(self, increase: bool, ctx: "BizHawkClientContext"):
-        # Grab the current health and the max health
+        # Grab the current lives amount
         data = (await bizhawk.read(ctx.bizhawk_ctx, [(self.address_table.current_lives, 1, "MainRAM")]))[0]
         current_lives = data[0]
 
@@ -330,10 +334,51 @@ class MMAPlayerState(MMAAddressTableConsumer):
 
     async def change_chicken_gun_timer(self, seconds: int, ctx: "BizHawkClientContext"):
         new_seconds = seconds * self.address_table.game_timer_frames
+
+        if self.pauseChickenTimer:
+            self.savedChickenTimer = new_seconds
+        else:
+            await bizhawk.write(
+                ctx.bizhawk_ctx,
+                [(self.address_table.chicken_timer, new_seconds.to_bytes(4, "little", signed=True), "MainRAM")],
+            )
+
+    async def checkMiniGameStatus(self, ctx: "BizHawkClientContext"):
+        """Returns whether or not the Player is in a Mini-Game"""
+        # read the mini-game timer, if it's > 0 we're in a mini-game
+        miniGameTimer = (await bizhawk.read(ctx.bizhawk_ctx, [(self.address_table.mini_game_timer, 4, "MainRAM")]))[0]
+        chickenGunTimer = (await bizhawk.read(ctx.bizhawk_ctx, [(self.address_table.chicken_timer, 4, "MainRAM")]))[0]
+
+        return int.from_bytes(chickenGunTimer, 'little', signed=True) < 0 or int.from_bytes(miniGameTimer, 'little', signed=True) > 0
+
+    def chickenTimerIsPaused(self):
+        """Returns if the chicken timer is paused"""
+        return self.pauseChickenTimer
+
+    async def suspendChickenTimer(self, ctx: "BizHawkClientContext"):
+        """Pauses the chicken timer, and temporarily stores the current timer"""
+        if not self.pauseChickenTimer:
+            # read the current chicken timer
+            data = (await bizhawk.read(ctx.bizhawk_ctx, [(self.address_table.chicken_timer, 4, "MainRAM")]))[0]
+            
+            self.savedChickenTimer = int.from_bytes(data, 'little', signed=True)
+            # Do not override the chicken timer, if it's -1
+            if self.savedChickenTimer <= 0:
+                self.savedChickenTimer = 0
+            else:
+                await self.change_chicken_gun_timer(0, ctx)
+            self.pauseChickenTimer = True
+
+    async def restartChickenTimer(self, ctx: "BizHawkClientContext"):
+        """Restarts the chicken timer at the temporarily paused value"""
+        if not self.pauseChickenTimer:
+            return
+
         await bizhawk.write(
             ctx.bizhawk_ctx,
-            [(self.address_table.chicken_timer, new_seconds.to_bytes(4, "little", signed=True), "MainRAM")],
+            [(self.address_table.chicken_timer, self.savedChickenTimer.to_bytes(4, "little", signed=True), "MainRAM")],
         )
+        self.pauseChickenTimer = False
 
 
 class MMAGameState(MMAAddressTableConsumer):
@@ -750,6 +795,12 @@ class MMAClient(BizHawkClient):
                 activeLevel = self.state.level_states[self.state.active_level_name]
                 await self.messageDisplay.updateMiniGameMessages(ctx, activeLevel.region.name)
                 await self.messageDisplay.disablePepeMessages(ctx, activeLevel.region.name)
+
+                isMiniGame = await self.state.player.checkMiniGameStatus(ctx)
+                if isMiniGame:
+                    await self.state.player.suspendChickenTimer(ctx)
+                elif self.state.player.chickenTimerIsPaused():
+                    await self.state.player.restartChickenTimer(ctx)
             else:
                 await self.messageDisplay.clearPepeMessage(ctx)
 
