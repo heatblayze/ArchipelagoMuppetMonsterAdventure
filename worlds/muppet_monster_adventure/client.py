@@ -346,8 +346,16 @@ class MMAPlayerState(MMAAddressTableConsumer):
     async def checkMiniGameStatus(self, ctx: "BizHawkClientContext"):
         """Returns whether or not the Player is in a Mini-Game"""
         # read the mini-game timer, if it's > 0 we're in a mini-game
-        miniGameTimer = (await bizhawk.read(ctx.bizhawk_ctx, [(self.address_table.mini_game_timer, 4, "MainRAM")]))[0]
-        chickenGunTimer = (await bizhawk.read(ctx.bizhawk_ctx, [(self.address_table.chicken_timer, 4, "MainRAM")]))[0]
+        timers = (
+            await bizhawk.read(
+                ctx.bizhawk_ctx, [
+                    (self.address_table.mini_game_timer, 4, "MainRAM"),
+                    (self.address_table.chicken_timer, 4, "MainRAM")
+                ]
+            )
+        )
+        miniGameTimer = timers[0]
+        chickenGunTimer = timers[1]
 
         return int.from_bytes(chickenGunTimer, 'little', signed=True) < 0 or int.from_bytes(miniGameTimer, 'little', signed=True) > 0
 
