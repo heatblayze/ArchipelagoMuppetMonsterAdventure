@@ -472,6 +472,12 @@ class MMAGameState(MMAAddressTableConsumer):
                     await self.messageDisplay.updateMiniGameMessages(ctx, activeLevel.region.name)
 
                 await self.messageDisplay.disablePepeMessages(ctx, activeLevel.region.name)
+
+                isMiniGame = await self.player.checkMiniGameStatus(ctx)
+                if isMiniGame:
+                    await self.player.suspendChickenTimer(ctx)
+                elif self.player.chickenTimerIsPaused():
+                    await self.player.restartChickenTimer(ctx)
             else:
                 await self.messageDisplay.clearPepeMessage(ctx)
 
