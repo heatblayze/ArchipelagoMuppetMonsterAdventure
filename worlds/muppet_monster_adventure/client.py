@@ -407,12 +407,15 @@ class MMAGameState(MMAAddressTableConsumer):
                     (self.address_table.hub_autospin, (0).to_bytes(length=4, byteorder="little"), "MainRAM"),
                 ],
             )
-            await self.messageDisplay.updateHubMessage(ctx)
+            if not self.messageDisplay.getLevelUpdated():
+                await self.messageDisplay.updateHubMessage(ctx)
+            else:
+                await self.messageDisplay.clearPepeMessage(ctx)
         else:
             # Disable Pepe's UI messages
             if self.active_level_name in self.level_states:
                 activeLevel = self.level_states[self.active_level_name]
-                if not self.messageDisplay.getMinigamesUpdated():
+                if not self.messageDisplay.getLevelUpdated():
                     await self.messageDisplay.updateMiniGameMessages(ctx, activeLevel.region.name)
 
                 await self.messageDisplay.disablePepeMessages(ctx, activeLevel.region.name)
