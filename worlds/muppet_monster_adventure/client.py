@@ -23,6 +23,7 @@ from .locations import (
     location_type_lookup_by_region,
     region_lookup,
 )
+from .message import MessageDisplay
 from .shared import (
     AbilityFlag,
     FillerType,
@@ -32,7 +33,6 @@ from .shared import (
     TrapType,
     game_name,
 )
-from .message import MessageDisplay
 
 
 class MMAAddressTableConsumer:
@@ -397,6 +397,7 @@ class MMAGameState(MMAAddressTableConsumer):
     saved_level_unlocks_size: int = ceil(len(region_lookup) / 8.0)
 
     custom_marker_value: int = 67
+    messageDisplay: MessageDisplay
 
     def __init__(
         self,
@@ -434,6 +435,7 @@ class MMAGameState(MMAAddressTableConsumer):
         self.goaled: bool = False
         self.last_received_index: int = 0
         self.first_check: bool = True
+        self.messageDisplay = MessageDisplay(address_table)
 
     # For writing persistent flags that need to be set every frame.
     # If this function returns False, we should not update this frame.
@@ -442,6 +444,7 @@ class MMAGameState(MMAAddressTableConsumer):
         load_state = await bizhawk.read(ctx.bizhawk_ctx, [(self.address_table.loading_state, 1, "MainRAM")])
         load_state_int = int.from_bytes(load_state[0], byteorder="little")
         if load_state_int != 16:
+            self.messageDisplay.levelHasChanged()
             return False
 
         if self.active_level_name == "HUB":
@@ -457,7 +460,21 @@ class MMAGameState(MMAAddressTableConsumer):
                     (self.address_table.hub_autospin, (0).to_bytes(length=4, byteorder="little"), "MainRAM"),
                 ],
             )
+            if not self.messageDisplay.getLevelUpdated():
+                await self.messageDisplay.updateHubMessage(ctx)
+            else:
+                await self.messageDisplay.clearPepeMessage(ctx)
         else:
+            # Disable Pepe's UI messages
+            if self.active_level_name in self.level_states:
+                activeLevel = self.level_states[self.active_level_name]
+                if not self.messageDisplay.getLevelUpdated():
+                    await self.messageDisplay.updateMiniGameMessages(ctx, activeLevel.region.name)
+
+                await self.messageDisplay.disablePepeMessages(ctx, activeLevel.region.name)
+            else:
+                await self.messageDisplay.clearPepeMessage(ctx)
+
             # TODO: we need to write the cheat (or an alternative) that allows you to always return to the Hub.
             await self.player.write_flags(ctx)
         return True
@@ -685,7 +702,6 @@ class MMAClient(BizHawkClient):
     # Memory sizes
     game_identifier_size: ClassVar[int] = 11
     level_name_size: ClassVar[int] = 10
-    messageDisplay: MessageDisplay
 
     version_addresses: ClassVar[dict[str, AddressTable]] = {
         "SLUS_012.38": ntsc_addresses,
@@ -748,7 +764,6 @@ class MMAClient(BizHawkClient):
         ctx.items_handling = self.items_handling
         ctx.want_slot_data = True
         ctx.watcher_timeout = 0.125
-        self.messageDisplay = MessageDisplay(found_table)
         return True
 
     def on_package(self, ctx: "BizHawkClientContext", cmd: str, args: dict[object, object]) -> None:
@@ -756,7 +771,7 @@ class MMAClient(BizHawkClient):
 
         match cmd:
             case "Connected":
-                if ctx.slot_data is not None:
+                if ctx.slot_data is not None and "goal_count" in ctx.slot_data:
                     self.goal_target = ctx.slot_data["goal_count"] or 6
                 # Ensure to reset the state in case something has changed here.
                 self.reset_state()
@@ -795,22 +810,6 @@ class MMAClient(BizHawkClient):
                         (self.address_table.cheat_permanent_morph_unlock, (0).to_bytes(1, "little"), "MainRAM"),
                     ],
                 )
-            elif self.state.active_level_name == "HUB":
-                await self.messageDisplay.updateHubMessage(ctx)
-
-            # Disable Pepe's UI messages
-            if self.state.active_level_name in self.state.level_states:
-                activeLevel = self.state.level_states[self.state.active_level_name]
-                await self.messageDisplay.updateMiniGameMessages(ctx, activeLevel.region.name)
-                await self.messageDisplay.disablePepeMessages(ctx, activeLevel.region.name)
-
-                isMiniGame = await self.state.player.checkMiniGameStatus(ctx)
-                if isMiniGame:
-                    await self.state.player.suspendChickenTimer(ctx)
-                elif self.state.player.chickenTimerIsPaused():
-                    await self.state.player.restartChickenTimer(ctx)
-            else:
-                await self.messageDisplay.clearPepeMessage(ctx)
 
             # TODO: probably others
             if (

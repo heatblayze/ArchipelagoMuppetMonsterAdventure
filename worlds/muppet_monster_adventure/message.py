@@ -7,6 +7,7 @@ if TYPE_CHECKING:
 
 class MessageDisplay:
     addressTable: AddressTable
+    levelMessageUpdated: bool = False
 
     def __init__(self, addressTable: AddressTable):
         self.addressTable = addressTable
@@ -41,11 +42,13 @@ class MessageDisplay:
             ['Loading retrieved items... Loading... Loading... Loading... Loading... Loading... Loading... Loading...'],
             [self.addressTable.level_hub_message]
         )
+        self.levelMessageUpdated = True
 
     async def updateMiniGameMessages(self, ctx: "BizHawkClientContext", levelName: str):
         """Sets the Start Message for all mini-games to a known string"""
         if levelName not in self.addressTable.level_minigame_data:
             return
+        
         gameAddresses = self.addressTable.level_minigame_data[levelName]
 
         for minigame in gameAddresses.minigames:
@@ -60,6 +63,8 @@ class MessageDisplay:
                     minigame.retry
                 ]
             )
+
+        self.levelMessageUpdated = True
 
     async def clearPepeMessage(self, ctx: "BizHawkClientContext"):
         await bizhawk.write(
@@ -104,3 +109,11 @@ class MessageDisplay:
             return
 
         await self.clearPepeMessage(ctx)
+
+    def getLevelUpdated(self):
+        """Returns whether or not the level messages function has run"""
+        return self.levelMessageUpdated
+
+    def levelHasChanged(self):
+        """Clears the levels messages updated flag"""
+        self.levelMessageUpdated = False
