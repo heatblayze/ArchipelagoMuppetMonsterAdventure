@@ -26,6 +26,7 @@ from .locations import (
     MMAEnergyLocationData,
     MMALocationData,
     MMAMuppetTokenLocationData,
+    MMAMuppetMinigameTokenLocationData,
     all_locations_table,
     location_name_groups,
     location_name_to_id,
@@ -100,6 +101,8 @@ class MuppetMonsterAdventureWorld(World):
         match loc:
             case MMABonusLetterLocationData():
                 return self.options.bonus_sanity.value == Toggle.option_true
+            case MMAMuppetMinigameTokenLocationData():
+                return self.options.disable_minigames.value == Toggle.option_false
             case MMAMuppetTokenLocationData():
                 return self.options.token_sanity.value == Toggle.option_true
             case MMAEnergyLocationData():
@@ -121,6 +124,8 @@ class MuppetMonsterAdventureWorld(World):
             "start_location": self.starting_level.name,
             # "death_link": self.options.death_link.value
             "goal_count": self.options.goal.value,
+            "disable_pepe_messages": self.options.disable_pepe_messages.value,
+            "reword_minigame_messages": self.options.reword_minigame_messages.value,
         }
         return slot_data
 

@@ -73,6 +73,23 @@ class TrapWeights(OptionCounter):
     valid_keys = sorted({trap.name for trap in trap_items_table})
     default = {trap.name: 1 for trap in trap_items_table}
 
+class DisablePepeMessages(Toggle):
+    """If enabled, Pepe will only talk to you, if he's running a mini-game, and minigames."""
+
+    display_name = "Disable Pepe Messages"
+    default = True
+
+class DisableMinigameTokens(Toggle):
+    """If enabled, will disable all minigame checks."""
+
+    display_name = "Disable minigames"
+    default = False 
+
+class RewordMinigameMessages(Toggle):
+    """If enabled, will remove the Mini-game explanation messages."""
+
+    display_name = "Reword mini-game messages"
+    default = True 
 
 # TODO: progressive morphs option? the order in the game is Climb, Swim, Glide, Smash, Push
 @dataclass
@@ -84,3 +101,6 @@ class MMAOptions(PerGameCommonOptions):
     trap_ratio: TrapRatio
     filler_weights: FillerWeights
     trap_weights: TrapWeights
+    disable_minigames: DisableMinigameTokens
+    disable_pepe_messages: DisablePepeMessages
+    reword_minigame_messages: RewordMinigameMessages

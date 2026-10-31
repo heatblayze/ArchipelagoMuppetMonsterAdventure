@@ -93,6 +93,16 @@ class MMAMuppetTokenLocationData(MMALocationData):
         super().__init__(LocationType.TOKEN, f"{LocationType.TOKEN.value} - {name}", ability_requirements)
 
 
+class MMAMuppetMinigameTokenLocationData(MMAMuppetTokenLocationData):
+    def __init__(
+        self,
+        name: str,
+        ability_requirements: list[AbilityFlag] | None = None,
+    ):
+        
+        super().__init__(name, ability_requirements)
+
+
 class MMAAmuletLocationData(MMALocationData):
     def __init__(
         self,
@@ -140,6 +150,8 @@ class TokenLocationData(NamedTuple):
     name: str
     requirements: list[AbilityFlag] | None = None
 
+class MinigameTokenLocationData(TokenLocationData):
+    isMinigame = True
 
 class LevelRegionData(NamedTuple):
     name: LevelName
@@ -172,11 +184,17 @@ class MMALevelRegion(MMARegion):
             ],
             *[
                 MMAMuppetTokenLocationData(token.name, token.requirements)
+                # the first is the default, which is listed above
+                if type(token) is TokenLocationData
+                # this is the 
+                else MMAMuppetMinigameTokenLocationData(token.name, token.requirements)
+                
                 for token in [*data.tokens, TokenLocationData("BONUS", data.bonus.token)]  # Append the bonus token
             ],
             *(data.extra_locations if data.extra_locations is not None else []),
         ]
         super().__init__(data.name, ingame_identifier, data.total_energy, locations)
+
         pass
 
 
@@ -254,11 +272,11 @@ level_groups: list[LevelGroup] = [
                     "Up Super Jump Pad",
                     None,
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Race Percy",
                     None,
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Sunflower minigame",
                     [AbilityFlag.GLIDE | AbilityFlag.CLIMB],
                 ),
@@ -316,7 +334,7 @@ level_groups: list[LevelGroup] = [
                     "On top of the bookshelves",
                     [AbilityFlag.SMASH | AbilityFlag.GLOVE | AbilityFlag.CLIMB],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Smashing minigame",
                     [AbilityFlag.SMASH | AbilityFlag.GLOVE],
                 ),
@@ -349,7 +367,7 @@ level_groups: list[LevelGroup] = [
                 token=[AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.CLIMB],
             ),
             tokens=[
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Target shooting minigame",
                     [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
                 ),
@@ -357,7 +375,7 @@ level_groups: list[LevelGroup] = [
                     "Standing pillar by start",
                     [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Block minigame",
                     [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SPIN],
                 ),
@@ -407,7 +425,7 @@ level_groups: list[LevelGroup] = [
                     "On pillar near Rizzo",
                     [AbilityFlag.PUSH],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Skull memory minigame",
                     [AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.SPIN],
                 ),
@@ -433,11 +451,11 @@ level_groups: list[LevelGroup] = [
                 token=[AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.SMASH],
             ),
             tokens=[
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Target shooting minigame",
                     [AbilityFlag.GLOVE],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Ghost hunting",
                     [AbilityFlag.ALL_WEAPONS | AbilityFlag.GLIDE | AbilityFlag.CLIMB],
                 ),
@@ -467,7 +485,7 @@ level_groups: list[LevelGroup] = [
                 token=[AbilityFlag.ALL_WEAPONS | AbilityFlag.GLIDE],
             ),
             tokens=[
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Shell collecting",
                     [AbilityFlag.GLIDE | AbilityFlag.GLOVE],
                 ),
@@ -479,7 +497,7 @@ level_groups: list[LevelGroup] = [
                     "Super Jump after the sunken ship",
                     [AbilityFlag.ALL_WEAPONS | AbilityFlag.GLIDE],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Race Simon",
                     [AbilityFlag.ALL_WEAPONS | AbilityFlag.GLIDE],
                 ),
@@ -513,11 +531,11 @@ level_groups: list[LevelGroup] = [
                     "Follow the floating Super Jump Pads",
                     [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Totem hunting",
                     [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Gliding minigame",
                     [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
                 ),
@@ -559,7 +577,7 @@ level_groups: list[LevelGroup] = [
                     "Atop the machine near Rizzo",
                     [AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.CLIMB],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Cog spinning minigame",
                     [AbilityFlag.GLIDE | AbilityFlag.SMASH | AbilityFlag.SPIN],
                 ),
@@ -585,7 +603,7 @@ level_groups: list[LevelGroup] = [
                 token=[AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.PUSH],
             ),
             tokens=[
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Climbing minigame",
                     [AbilityFlag.CLIMB],
                 ),
@@ -597,7 +615,7 @@ level_groups: list[LevelGroup] = [
                     "On a hidden ledge near BONUS crate",
                     [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Race Willie", [AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.PUSH]
                 ),
                 TokenLocationData(
@@ -626,10 +644,10 @@ level_groups: list[LevelGroup] = [
             ),
             tokens=[
                 TokenLocationData("Near BONUS letter O", [AbilityFlag.GLIDE]),
-                TokenLocationData("Ghost hunting", [AbilityFlag.PUSH | AbilityFlag.ALL_WEAPONS]),
+                MinigameTokenLocationData("Ghost hunting", [AbilityFlag.PUSH | AbilityFlag.ALL_WEAPONS]),
                 TokenLocationData("Guarded by an evil scarecrow", [AbilityFlag.PUSH | AbilityFlag.GLOVE]),
                 TokenLocationData("By a pink barrel", [AbilityFlag.PUSH | AbilityFlag.GLOVE]),
-                TokenLocationData("Smash the water things", [AbilityFlag.PUSH | AbilityFlag.GLOVE | AbilityFlag.SMASH]),
+                MinigameTokenLocationData("Smash the water things", [AbilityFlag.PUSH | AbilityFlag.GLOVE | AbilityFlag.SMASH]),
             ],
         ),
         two=LevelRegionData(
@@ -652,7 +670,7 @@ level_groups: list[LevelGroup] = [
                     "On a hidden ledge near rolling barrels",
                     flag_variants(AbilityFlag.GLOVE | AbilityFlag.CLIMB, AbilityFlag.PUSH, AbilityFlag.GLIDE),
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Snake catching",
                     flag_variants(AbilityFlag.GLOVE | AbilityFlag.CLIMB, AbilityFlag.PUSH, AbilityFlag.GLIDE),
                 ),
@@ -664,7 +682,7 @@ level_groups: list[LevelGroup] = [
                     "On a hidden ledge near pushable crates",
                     [AbilityFlag.ALL_WEAPONS | AbilityFlag.CLIMB | AbilityFlag.PUSH],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Race Percy",
                     [AbilityFlag.ALL_WEAPONS | AbilityFlag.CLIMB | AbilityFlag.PUSH],
                 ),
@@ -696,7 +714,7 @@ level_groups: list[LevelGroup] = [
                     "Near BONUS letter O",
                     [AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Pushing puzzle",
                     [AbilityFlag.GLOVE | AbilityFlag.GLIDE | AbilityFlag.PUSH],
                 ),
@@ -746,7 +764,7 @@ level_groups: list[LevelGroup] = [
                     "In the pufferfish-filled tunnel",
                     [AbilityFlag.SWIM],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Race the Shark",
                     [AbilityFlag.SWIM],
                 ),
@@ -754,7 +772,7 @@ level_groups: list[LevelGroup] = [
                     "Guarded by an enemy inside a smashable hut",
                     [AbilityFlag.ALL_WEAPONS | AbilityFlag.SWIM | AbilityFlag.SMASH],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Gather ingredients for soup",
                     [AbilityFlag.ALL_WEAPONS | AbilityFlag.SWIM | AbilityFlag.GLIDE],
                 ),
@@ -784,11 +802,11 @@ level_groups: list[LevelGroup] = [
                     "On a hanging platform above the swimming tunnel",
                     [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Block pushing puzzle",
                     [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.ALL_WEAPONS | AbilityFlag.SWIM],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Hunt the Golden Statues",
                     [AbilityFlag.PUSH | AbilityFlag.GLIDE | AbilityFlag.GLOVE | AbilityFlag.SWIM],
                 ),
@@ -834,7 +852,7 @@ level_groups: list[LevelGroup] = [
                     "Above the steaming cauldron",
                     [AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.SWIM],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Pearl hunting",
                     [AbilityFlag.GLOVE | AbilityFlag.CLIMB | AbilityFlag.GLIDE | AbilityFlag.SWIM],
                 ),
@@ -872,7 +890,7 @@ level_groups: list[LevelGroup] = [
                     "In the water near the start",
                     [AbilityFlag.SWIM],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Ghost hunting",
                     [AbilityFlag.GLOVE | AbilityFlag.SMASH | AbilityFlag.SPIN],
                 ),
@@ -915,7 +933,7 @@ level_groups: list[LevelGroup] = [
                     "Guarded by two Snowmen",
                     [AbilityFlag.SPIN | AbilityFlag.GLIDE | AbilityFlag.PUSH | AbilityFlag.SMASH],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Target shooting minigame",
                     [AbilityFlag.ALL_WEAPONS | AbilityFlag.GLIDE | AbilityFlag.PUSH | AbilityFlag.SMASH],
                 ),
@@ -927,7 +945,7 @@ level_groups: list[LevelGroup] = [
                     "Sitting on an archway",
                     [AbilityFlag.ALL_WEAPONS | AbilityFlag.GLIDE | AbilityFlag.PUSH | AbilityFlag.SMASH],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Cracking the Master up",
                     [AbilityFlag.ALL_WEAPONS | AbilityFlag.GLIDE | AbilityFlag.PUSH | AbilityFlag.SMASH],
                 ),
@@ -954,11 +972,11 @@ level_groups: list[LevelGroup] = [
                     "Just after gliding minigame",
                     [AbilityFlag.GLOVE | AbilityFlag.SMASH | AbilityFlag.GLIDE],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Gliding minigame",
                     [AbilityFlag.GLOVE | AbilityFlag.SMASH | AbilityFlag.GLIDE],
                 ),
-                TokenLocationData(
+                MinigameTokenLocationData(
                     "Race Charlie",
                     [AbilityFlag.GLOVE | AbilityFlag.SMASH | AbilityFlag.GLIDE],
                 ),

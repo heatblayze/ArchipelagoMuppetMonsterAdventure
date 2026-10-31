@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 class MessageDisplay:
     addressTable: AddressTable
     levelMessageUpdated: bool = False
+    isMinigameMessage: bool = False
 
     def __init__(self, addressTable: AddressTable):
         self.addressTable = addressTable
@@ -88,6 +89,7 @@ class MessageDisplay:
 
         # Ignore any "blank" messages
         if messageAddress == b'\x00\x00\x00':
+            self.isMinigameMessage = False
             return
         converted = self.convertMemoryAddress(messageAddress)
         
@@ -98,14 +100,13 @@ class MessageDisplay:
 
         gameAddresses = self.addressTable.level_minigame_data[levelName]
 
-        isMiniGame = False
         for minigame in gameAddresses.minigames:
             if converted == minigame.start or converted == minigame.retry:
-                isMiniGame = True
+                self.isMinigameMessage = True
                 break
 
         # don't block mini-game messages
-        if isMiniGame:
+        if self.isMinigameMessage:
             return
 
         await self.clearPepeMessage(ctx)

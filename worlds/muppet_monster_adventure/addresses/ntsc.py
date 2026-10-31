@@ -336,7 +336,7 @@ ntsc_addresses = AddressTable(
         LevelName.FOR_PETONS_SAKE: MiniGameTable(
             minigames=[
                 MiniGameAddress(retry=0x14CF1F, start=0x14CF6B, name="Glinding Around"), # Gliding mini-game
-                MiniGameAddress(retry=0x14D054, start=0x14D0C0, name="Race against Charles the Penguin"), # Race against Charles the Penguin
+                MiniGameAddress(retry=0x14D054, start=0x14D0C0, name="Race against Charlie the Penguin"), # Race against Charlie the Penguin
             ]
         ),
     },

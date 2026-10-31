@@ -462,23 +462,24 @@ class MMAGameState(MMAAddressTableConsumer):
             )
             if not self.messageDisplay.getLevelUpdated():
                 await self.messageDisplay.updateHubMessage(ctx)
-            else:
+            elif ctx.slot_data['disable_pepe_messages']:
                 await self.messageDisplay.clearPepeMessage(ctx)
         else:
             # Disable Pepe's UI messages
             if self.active_level_name in self.level_states:
                 activeLevel = self.level_states[self.active_level_name]
-                if not self.messageDisplay.getLevelUpdated():
+                if ctx.slot_data['reword_minigame_messages'] and not self.messageDisplay.getLevelUpdated():
                     await self.messageDisplay.updateMiniGameMessages(ctx, activeLevel.region.name)
 
-                await self.messageDisplay.disablePepeMessages(ctx, activeLevel.region.name)
+                if ctx.slot_data['disable_pepe_messages']:
+                    await self.messageDisplay.disablePepeMessages(ctx, activeLevel.region.name)
 
                 isMiniGame = await self.player.checkMiniGameStatus(ctx)
                 if isMiniGame:
                     await self.player.suspendChickenTimer(ctx)
                 elif self.player.chickenTimerIsPaused():
                     await self.player.restartChickenTimer(ctx)
-            else:
+            elif ctx.slot_data['disable_pepe_messages']:
                 await self.messageDisplay.clearPepeMessage(ctx)
 
             # TODO: we need to write the cheat (or an alternative) that allows you to always return to the Hub.
